@@ -253,6 +253,10 @@ const CostsManager: React.FC = () => {
     }).format(price);
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR');
+  };
+
   const filteredParts = partsCosts.filter(part => {
     const matchesSearch = part.part_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          part.supplier?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -657,7 +661,7 @@ const CostsManager: React.FC = () => {
                           )}
                           <div>
                             <span className="text-zinc-500">Date:</span>
-                            <span className="text-zinc-300 ml-2">{basePurchase.purchase_date}</span>
+                            <span className="text-zinc-300 ml-2">{formatDate(basePurchase.purchase_date)}</span>
                           </div>
                         </div>
                         {basePurchase.notes && (
@@ -745,7 +749,7 @@ const CostsManager: React.FC = () => {
                           )}
                           <div>
                             <span className="text-zinc-500">Date:</span>
-                            <span className="text-zinc-300 ml-2">{part.purchase_date}</span>
+                            <span className="text-zinc-300 ml-2">{formatDate(part.purchase_date)}</span>
                           </div>
                           {part.invoice_id && (
                             <div>
@@ -819,7 +823,7 @@ const CostsManager: React.FC = () => {
                         </div>
                         <div>
                           <span className="text-zinc-500">Date:</span>
-                          <span className="text-zinc-300 ml-2">{invoice.invoice_date}</span>
+                          <span className="text-zinc-300 ml-2">{formatDate(invoice.invoice_date)}</span>
                         </div>
                       </div>
                       {invoice.description && (
