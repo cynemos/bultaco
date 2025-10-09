@@ -1,7 +1,17 @@
 import React from 'react';
 import { Heart, Mail, Phone, Calendar } from 'lucide-react';
 
-const Footer: React.FC = () => {
+interface FooterProps {
+  onNavigate?: (section: string) => void;
+}
+
+const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+  const handleNavClick = (section: string) => {
+    if (onNavigate) {
+      onNavigate(section);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
   return (
     <footer className="bg-zinc-950 border-t border-zinc-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -39,11 +49,21 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">Navigation</h4>
             <div className="space-y-2">
-              {['Accueil', 'Galerie', 'Chronologie', 'Technique', 'Coûts'].map((item) => (
-                <div key={item} className="text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors">
-                  {item}
-                </div>
-              ))}
+              <button onClick={() => handleNavClick('home')} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
+                Accueil
+              </button>
+              <button onClick={() => handleNavClick('gallery')} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
+                Galerie
+              </button>
+              <button onClick={() => handleNavClick('timeline')} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
+                Chronologie
+              </button>
+              <button onClick={() => handleNavClick('technical')} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
+                Technique
+              </button>
+              <button onClick={() => handleNavClick('costs')} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
+                Coûts
+              </button>
             </div>
           </div>
         </div>

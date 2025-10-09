@@ -50,13 +50,13 @@ const AppContent: React.FC = () => {
           </div>
         </>
       )}
-      
+
       {activeSection === 'gallery' && <Gallery />}
       {activeSection === 'timeline' && <Timeline />}
       {activeSection === 'technical' && <TechnicalSpecs />}
       {activeSection === 'costs' && <CostsOverview />}
-      
-      <Footer />
+
+      <Footer onNavigate={setActiveSection} />
     </div>
   );
 };
