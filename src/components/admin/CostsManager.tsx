@@ -257,7 +257,8 @@ const CostsManager: React.FC = () => {
     const matchesSearch = part.part_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          part.supplier?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || part.category === categoryFilter;
-    return matchesSearch && matchesCategory;
+    const isNotBasePurchase = part.category !== 'administrative';
+    return matchesSearch && matchesCategory && isNotBasePurchase;
   });
 
   const basePurchase = statistics.basePurchase;
