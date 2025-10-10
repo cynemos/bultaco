@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Image, Calendar, CheckCircle, Clock, TrendingUp, Users, Euro, Package, Settings } from 'lucide-react';
 import { getPhotos, getTimelineEvents, getTechnicalSpecs, getCostStatistics } from '../../lib/supabase';
+import AdvancedStats from './AdvancedStats';
 
 const StatsOverview: React.FC = () => {
   const [stats, setStats] = useState({
@@ -15,6 +16,7 @@ const StatsOverview: React.FC = () => {
   });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [categoryStats, setCategoryStats] = useState<any[]>([]);
+  const [costStatistics, setCostStatistics] = useState<any>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -84,9 +86,10 @@ const StatsOverview: React.FC = () => {
         basePurchaseCost: costStats.basePurchaseCost || 0,
         restorationParts: costStats.totalParts || 0
       });
-      
+
       setRecentActivity(activity.slice(0, 4));
       setCategoryStats(categoryData);
+      setCostStatistics(costStats);
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error);
     } finally {
@@ -261,8 +264,8 @@ const StatsOverview: React.FC = () => {
             </div>
             <div className="text-zinc-300 mb-2">Progression globale</div>
             <div className="w-full bg-zinc-700 rounded-full h-2">
-              <div 
-                className="bg-green-500 h-2 rounded-full transition-all duration-300" 
+              <div
+                className="bg-green-500 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${stats.completedEvents > 0 ? Math.round((stats.completedEvents / (stats.completedEvents + stats.inProgressEvents + stats.pendingEvents)) * 100) : 0}%` }}
               ></div>
             </div>
@@ -273,8 +276,8 @@ const StatsOverview: React.FC = () => {
             </div>
             <div className="text-zinc-300 mb-2">Étapes terminées</div>
             <div className="w-full bg-zinc-700 rounded-full h-2">
-              <div 
-                className="bg-orange-500 h-2 rounded-full transition-all duration-300" 
+              <div
+                className="bg-orange-500 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${stats.completedEvents > 0 ? Math.round((stats.completedEvents / (stats.completedEvents + stats.inProgressEvents + stats.pendingEvents)) * 100) : 0}%` }}
               ></div>
             </div>
@@ -285,6 +288,12 @@ const StatsOverview: React.FC = () => {
             <div className="text-zinc-500 text-sm">Pièces documentées</div>
           </div>
         </div>
+      </div>
+
+      {/* Advanced Statistics */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold text-white mb-6">Statistiques avancées</h2>
+        <AdvancedStats statistics={costStatistics} />
       </div>
     </div>
   );

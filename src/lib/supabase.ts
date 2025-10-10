@@ -463,7 +463,7 @@ export const getCostStatistics = async () => {
   try {
     const { data: costs, error } = await supabase
       .from('parts_costs')
-      .select('part_name, category, condition, price, currency');
+      .select('part_name, category, condition, price, currency, purchase_date');
 
     if (error) throw error;
 
@@ -493,6 +493,48 @@ export const getCostStatistics = async () => {
       return acc;
     }, {});
 
+    // Calculate average cost by category
+    const averageCostByCategory = Object.entries(costsByCategory).reduce((acc: any, [category, total]) => {
+      const count = restorationParts.filter(p => p.category === category).length;
+      acc[category] = count > 0 ? (total as number) / count : 0;
+      return acc;
+    }, {});
+
+    // Calculate parts count by condition
+    const countByCondition = restorationParts.reduce((acc: any, cost) => {
+      acc[cost.condition] = (acc[cost.condition] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Calculate ratio new/used
+    const newCount = countByCondition.new || 0;
+    const usedCount = (countByCondition.used || 0) + (countByCondition.refurbished || 0);
+    const totalCountForRatio = newCount + usedCount;
+    const newToUsedRatio = totalCountForRatio > 0 ? {
+      new: Math.round((newCount / totalCountForRatio) * 100),
+      used: Math.round((usedCount / totalCountForRatio) * 100),
+      newCount,
+      usedCount
+    } : { new: 0, used: 0, newCount: 0, usedCount: 0 };
+
+    // Calculate budget evolution over time
+    const sortedCosts = [...restorationParts].sort((a, b) =>
+      new Date(a.purchase_date).getTime() - new Date(b.purchase_date).getTime()
+    );
+
+    const budgetEvolution = sortedCosts.reduce((acc: any[], cost) => {
+      const previousTotal = acc.length > 0 ? acc[acc.length - 1].cumulative : 0;
+      const cumulative = previousTotal + parseFloat(cost.price.toString());
+      acc.push({
+        date: cost.purchase_date,
+        amount: parseFloat(cost.price.toString()),
+        cumulative,
+        part_name: cost.part_name,
+        category: cost.category
+      });
+      return acc;
+    }, []);
+
     return {
       totalCost,
       basePurchaseCost,
@@ -501,7 +543,11 @@ export const getCostStatistics = async () => {
       costsByCategory,
       costsByCondition,
       totalParts: costs?.length || 0,
-      restorationParts: restorationParts.length
+      restorationParts: restorationParts.length,
+      averageCostByCategory,
+      countByCondition,
+      newToUsedRatio,
+      budgetEvolution
     };
   } catch (error) {
     console.error('Error getting cost statistics:', error);
@@ -513,7 +559,11 @@ export const getCostStatistics = async () => {
       costsByCategory: {},
       costsByCondition: {},
       totalParts: 0,
-      restorationParts: 0
+      restorationParts: 0,
+      averageCostByCategory: {},
+      countByCondition: {},
+      newToUsedRatio: { new: 0, used: 0, newCount: 0, usedCount: 0 },
+      budgetEvolution: []
     };
   }
 };
