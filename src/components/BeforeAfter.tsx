@@ -73,7 +73,7 @@ const BeforeAfter: React.FC = () => {
             {/* Before Image */}
             <div className="absolute inset-0">
               <img
-                src="https://i.servimg.com/u/f28/12/40/02/10/trial-12.jpg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop"
+                src="https://i.servimg.com/u/f28/12/40/02/10/trial-13.jpg"
                 alt="Avant restauration"
                 className="w-full h-full object-cover"
               />
