@@ -52,7 +52,7 @@ export interface Setting {
 export interface PartCost {
   id: string;
   part_name: string;
-  category: 'engine' | 'bodywork' | 'electrical' | 'wheels' | 'transmission' | 'suspension' | 'accessories' | 'tools' | 'administrative';
+  category: 'engine' | 'bodywork' | 'electrical' | 'wheels' | 'transmission' | 'suspension' | 'accessories' | 'tools' | 'administrative' | 'sales';
   condition: 'new' | 'used' | 'refurbished';
   price: number;
   currency: string;

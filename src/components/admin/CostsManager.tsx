@@ -57,7 +57,8 @@ const CostsManager: React.FC = () => {
     { value: 'suspension', label: 'Suspension', color: 'text-orange-400' },
     { value: 'accessories', label: 'Accessoires', color: 'text-cyan-400' },
     { value: 'tools', label: 'Outils', color: 'text-pink-400' },
-    { value: 'administrative', label: 'Administratif', color: 'text-indigo-400' }
+    { value: 'administrative', label: 'Administratif', color: 'text-indigo-400' },
+    { value: 'sales', label: 'Vente', color: 'text-emerald-400' }
   ];
 
   const conditions = [
