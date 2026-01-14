@@ -222,8 +222,8 @@ export const getSettingByKey = async (key: string) => {
     .from('settings')
     .select('*')
     .eq('key', key)
-    .single();
-  
+    .maybeSingle();
+
   if (error) throw error;
   return data;
 };
