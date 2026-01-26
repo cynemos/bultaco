@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -9,8 +8,7 @@ const AdminLogin: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
-
+  
   const { signIn } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,27 +17,12 @@ const AdminLogin: React.FC = () => {
     setError('');
 
     try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (error) {
-          setError('Erreur lors de l\'inscription: ' + error.message);
-        } else {
-          setError('');
-          setIsSignUp(false);
-          setEmail('');
-          setPassword('');
-        }
-      } else {
-        const { error } = await signIn(email, password);
-        if (error) {
-          setError('Email ou mot de passe incorrect');
-        }
+      const { error } = await signIn(email, password);
+      if (error) {
+        setError('Email ou mot de passe incorrect');
       }
     } catch (err) {
-      setError('Une erreur est survenue');
+      setError('Une erreur est survenue lors de la connexion');
     } finally {
       setLoading(false);
     }
@@ -54,7 +37,7 @@ const AdminLogin: React.FC = () => {
               <Lock className="h-8 w-8 text-orange-400" />
             </div>
             <h1 className="text-2xl font-bold text-white mb-2">Administration</h1>
-            <p className="text-zinc-400">{isSignUp ? 'Créer un compte' : 'Connectez-vous pour gérer le contenu'}</p>
+            <p className="text-zinc-400">Connectez-vous pour gérer le contenu</p>
           </div>
 
           {error && (
@@ -110,21 +93,14 @@ const AdminLogin: React.FC = () => {
               disabled={loading}
               className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-600 hover:to-orange-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-zinc-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? (isSignUp ? 'Inscription...' : 'Connexion...') : (isSignUp ? 'S\'inscrire' : 'Se connecter')}
+              {loading ? 'Connexion...' : 'Se connecter'}
             </button>
           </form>
 
           <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setIsSignUp(!isSignUp);
-                setError('');
-              }}
-              className="text-zinc-400 hover:text-orange-400 text-sm transition-colors"
-            >
-              {isSignUp ? 'Vous avez déjà un compte? Connectez-vous' : 'Pas de compte? S\'inscrire'}
-            </button>
+            <p className="text-zinc-500 text-sm">
+              Accès réservé aux administrateurs
+            </p>
           </div>
         </div>
       </div>
