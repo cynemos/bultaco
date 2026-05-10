@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, Mail, Eye, EyeOff, UserPlus } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -26,22 +27,19 @@ const AdminLogin: React.FC = () => {
           return;
         }
 
-        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/auth-admin`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({
-            email,
-            password,
-            action: 'signup',
-          }),
+        if (password.length < 6) {
+          setError('Le mot de passe doit contenir au moins 6 caractères');
+          setLoading(false);
+          return;
+        }
+
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
         });
 
-        if (!response.ok) {
-          const data = await response.json();
-          setError(data.error || 'Erreur lors de la création du compte');
+        if (error) {
+          setError(error.message || 'Erreur lors de la création du compte');
         } else {
           setError('');
           setIsSignup(false);
