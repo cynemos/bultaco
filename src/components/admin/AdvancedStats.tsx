@@ -11,10 +11,11 @@ const AdvancedStats: React.FC<AdvancedStatsProps> = ({ statistics }) => {
     { value: 'bodywork', label: 'Carrosserie', color: 'text-blue-400' },
     { value: 'electrical', label: 'Électricité', color: 'text-yellow-400' },
     { value: 'wheels', label: 'Roues & Freins', color: 'text-green-400' },
-    { value: 'transmission', label: 'Transmission', color: 'text-purple-400' },
+    { value: 'transmission', label: 'Transmission', color: 'text-teal-400' },
     { value: 'suspension', label: 'Suspension', color: 'text-orange-400' },
     { value: 'accessories', label: 'Accessoires', color: 'text-cyan-400' },
-    { value: 'tools', label: 'Outils', color: 'text-pink-400' }
+    { value: 'tools', label: 'Outils', color: 'text-pink-400' },
+    { value: 'labour', label: 'Main d\'oeuvre', color: 'text-amber-400' }
   ];
 
   const formatPrice = (price: number, currency = 'EUR') => {
