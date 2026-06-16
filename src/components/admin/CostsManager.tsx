@@ -857,6 +857,76 @@ const CostsManager: React.FC = () => {
             </div>
           )}
 
+          {activeTab === 'procedures' && (
+            <div className="grid gap-4">
+              {procedures.map((procedure) => {
+                const statusOption = statusOptions.find(s => s.value === procedure.status);
+                const priorityOption = priorityOptions.find(p => p.value === procedure.priority);
+                return (
+                  <div key={procedure.id} className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h3 className="text-white font-semibold text-lg">{procedure.title}</h3>
+                          {statusOption && (
+                            <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium border ${statusOption.color}`}>
+                              <statusOption.icon className="h-3 w-3" />
+                              <span>{statusOption.label}</span>
+                            </span>
+                          )}
+                          {priorityOption && (
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-zinc-700 ${priorityOption.color}`}>
+                              {priorityOption.label}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-zinc-300 text-sm mb-3">{procedure.description}</div>
+                        <div className="grid md:grid-cols-4 gap-4 text-sm">
+                          {procedure.responsible && (
+                            <div>
+                              <span className="text-zinc-500">Responsable:</span>
+                              <span className="text-zinc-300 ml-2">{procedure.responsible}</span>
+                            </div>
+                          )}
+                          {procedure.due_date && (
+                            <div>
+                              <span className="text-zinc-500">Date limite:</span>
+                              <span className="text-zinc-300 ml-2">{new Date(procedure.due_date).toLocaleDateString('fr-FR')}</span>
+                            </div>
+                          )}
+                        </div>
+                        {procedure.notes && (
+                          <p className="text-zinc-400 text-sm mt-2 italic">{procedure.notes}</p>
+                        )}
+                      </div>
+                      <div className="flex space-x-2 ml-4">
+                        <button
+                          onClick={() => handleEditProcedure(procedure)}
+                          className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg transition-colors"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProcedure(procedure.id)}
+                          className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {procedures.length === 0 && (
+                <div className="text-center py-12">
+                  <CheckCircle2 className="h-16 w-16 text-zinc-600 mx-auto mb-4" />
+                  <p className="text-zinc-400 mb-4">Aucune démarche ajoutée</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {activeTab === 'stats' && (
             <div className="space-y-8">
               {/* Summary Cards */}
