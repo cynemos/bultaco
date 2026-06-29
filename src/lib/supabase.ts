@@ -112,6 +112,7 @@ export const addTimelineEvent = async (event: {
   status: 'completed' | 'in-progress' | 'pending';
   category: string;
   image_url?: string;
+  video_url?: string;
 }) => {
   const { data, error } = await supabase
     .from('timeline_events')
@@ -129,6 +130,7 @@ export const updateTimelineEvent = async (id: string, updates: {
   status?: 'completed' | 'in-progress' | 'pending';
   category?: string;
   image_url?: string;
+  video_url?: string;
 }) => {
   const { data, error } = await supabase
     .from('timeline_events')

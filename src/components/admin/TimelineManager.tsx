@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, CreditCard as Edit2, Trash2, Save, X, Calendar, Clock, CheckCircle, Circle, AlertCircle, Upload, Image as ImageIcon } from 'lucide-react';
+import { Plus, CreditCard as Edit2, Trash2, Save, X, Calendar, Clock, CheckCircle, Circle, AlertCircle, Upload, Image as ImageIcon, Youtube } from 'lucide-react';
 import { getTimelineEvents, addTimelineEvent, updateTimelineEvent, deleteTimelineEvent, uploadImage } from '../../lib/supabase';
 
 interface TimelineEvent {
@@ -28,7 +28,8 @@ const TimelineManager: React.FC = () => {
     date: new Date().toISOString().split('T')[0],
     status: 'pending' as 'completed' | 'in-progress' | 'pending',
     category: '',
-    image_url: ''
+    image_url: '',
+    video_url: ''
   });
 
   const statusOptions = [
@@ -99,7 +100,8 @@ const TimelineManager: React.FC = () => {
         date: formData.date,
         status: formData.status,
         category: formData.category,
-        image_url: imageUrl || undefined
+        image_url: imageUrl || undefined,
+        video_url: formData.video_url || undefined
       };
 
       if (editingEvent) {
@@ -127,7 +129,8 @@ const TimelineManager: React.FC = () => {
       date: event.date,
       status: event.status,
       category: event.category,
-      image_url: event.image_url || ''
+      image_url: event.image_url || '',
+      video_url: event.video_url || ''
     });
     setSelectedFile(null);
     setPreviewUrl(event.image_url || '');
@@ -153,7 +156,8 @@ const TimelineManager: React.FC = () => {
       date: new Date().toISOString().split('T')[0],
       status: 'pending',
       category: '',
-      image_url: ''
+      image_url: '',
+      video_url: ''
     });
     setEditingEvent(null);
     setShowAddForm(false);
@@ -344,6 +348,25 @@ const TimelineManager: React.FC = () => {
                 </div>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  Vidéo YouTube (optionnel)
+                </label>
+                <div className="relative">
+                  <Youtube className="absolute left-3 top-1/2 transform -translate-y-1/2 text-red-500 h-5 w-5" />
+                  <input
+                    type="url"
+                    value={formData.video_url}
+                    onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
+                    placeholder="https://www.youtube.com/watch?v=... ou https://youtu.be/..."
+                    className="w-full pl-10 pr-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  />
+                </div>
+                <p className="text-xs text-zinc-500 mt-2">
+                  Collez le lien d'une vidéo de votre chaîne YouTube. Elle sera intégrée dans l'étape de la timeline.
+                </p>
+              </div>
+
               <div className="flex justify-end space-x-4">
                 <button
                   type="button"
@@ -419,6 +442,13 @@ const TimelineManager: React.FC = () => {
                     alt={event.title}
                     className="w-full max-w-md rounded-lg border border-zinc-600"
                   />
+                </div>
+              )}
+
+              {event.video_url && (
+                <div className="mt-4 flex items-center space-x-2 text-sm text-red-400">
+                  <Youtube className="h-4 w-4" />
+                  <span>Vidéo YouTube associée</span>
                 </div>
               )}
             </div>

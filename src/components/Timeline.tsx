@@ -3,6 +3,17 @@ import { Calendar, Clock, CheckCircle, Circle, AlertCircle } from 'lucide-react'
 import { getTimelineEvents } from '../lib/supabase';
 import { TimelineEvent } from '../types';
 
+const getYouTubeEmbedUrl = (url: string): string | null => {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([\w-]{11})/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return `https://www.youtube.com/embed/${match[1]}`;
+  }
+  return null;
+};
+
 const Timeline: React.FC = () => {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -112,6 +123,21 @@ const Timeline: React.FC = () => {
                         alt={event.title}
                         className="w-full max-w-md rounded-lg border border-zinc-700"
                       />
+                    </div>
+                  )}
+
+                  {event.video_url && getYouTubeEmbedUrl(event.video_url) && (
+                    <div className="mt-4 w-full max-w-md">
+                      <div className="relative w-full rounded-lg overflow-hidden border border-zinc-700" style={{ paddingBottom: '56.25%' }}>
+                        <iframe
+                          src={getYouTubeEmbedUrl(event.video_url)}
+                          title={event.title}
+                          className="absolute top-0 left-0 w-full h-full"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      </div>
                     </div>
                   )}
 

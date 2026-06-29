@@ -18,6 +18,7 @@ export interface TimelineEvent {
   status: 'completed' | 'in-progress' | 'pending';
   category: string;
   imageUrl?: string;
+  video_url?: string;
 }
 
 export interface TechnicalSpec {
