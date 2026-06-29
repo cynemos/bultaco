@@ -41,10 +41,10 @@ const TechnicalSpecs: React.FC = () => {
     ],
     engine: [
       { label: 'Type moteur', value: 'Monocylindre 2 temps refroidi par air' },
-      { label: 'Cylindrée', value: '326 cc' },
-      { label: 'Alésage x Course', value: '83.20 x 60 mm' },
+      { label: 'Cylindrée', value: '325 cc' },
+      { label: 'Alésage x Course', value: '83 x 60 mm' },
       { label: 'Taux de compression', value: '11.5:1' },
-      { label: 'Puissance', value: '20.5 ch à 6000 tr/min' },
+      { label: 'Puissance', value: '22 ch à 6000 tr/min' },
       { label: 'Allumage', value: 'Magneto Motoplat' },
       { label: 'Carburation', value: 'Bing 84' },
       { label: 'Graissage', value: 'Mélange essence-huile 3%' },
