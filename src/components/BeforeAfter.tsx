@@ -89,7 +89,7 @@ const BeforeAfter: React.FC = () => {
               style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
             >
               <img
-                src="https://i28.servimg.com/u/f28/12/40/02/10/20251017.jpg"
+                src="https://i.servimg.com/u/f73/20/54/60/69/img_5111.jpg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop"
                 alt="Après restauration"
                 className="w-full h-full object-cover"
               />
