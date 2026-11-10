@@ -325,7 +325,7 @@ const CostsOverview: React.FC = () => {
                 <div className="pt-3 border-t border-orange-500/20">
                   <div className="flex justify-between text-xs">
                     <span className="text-zinc-400">Début du projet:</span>
-                    <span className="text-orange-400">Août 2024</span>
+                    <span className="text-orange-400">Août 2025</span>
                   </div>
                 </div>
               </div>

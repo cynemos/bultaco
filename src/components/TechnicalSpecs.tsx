@@ -96,19 +96,19 @@ const TechnicalSpecs: React.FC = () => {
       year: '1977',
       title: 'Champion du Monde Trial',
       rider: 'Yrjö Vesterinen',
-      details: 'Troisième titre mondial pour Bultaco'
+      details: 'Troisième titre mondial consécutif pour Bultaco'
     },
     {
       year: '1978',
-      title: 'Vice-Champion du Monde',
-      rider: 'Charles Coutard',
-      details: 'Podium français avec la Sherpa'
+      title: 'Champion du Monde Trial',
+      rider: 'Yrjö Vesterinen',
+      details: 'Troisième titre consécutif pour Vesterinen'
     },
     {
       year: '1979',
       title: 'Champion du Monde Trial',
       rider: 'Bernie Schreiber',
-      details: 'Quatrième et dernier titre pour Bultaco'
+      details: 'Cinquième titre consécutif pour Bultaco'
     }
   ];
 
@@ -301,7 +301,7 @@ const TechnicalSpecs: React.FC = () => {
           <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 rounded-xl p-8 border border-orange-500/30 mb-8">
             <div className="text-center mb-6">
               <Trophy className="h-12 w-12 text-orange-400 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-orange-400 mb-2">4 Titres Mondiaux Consécutifs</h3>
+              <h3 className="text-2xl font-bold text-orange-400 mb-2">5 Titres Mondiaux Consécutifs</h3>
               <p className="text-zinc-300">La Bultaco Sherpa 350T a dominé le trial mondial de 1975 à 1979</p>
             </div>
           </div>
