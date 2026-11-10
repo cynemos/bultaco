@@ -11,6 +11,20 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Vérifie côté base (fonction public.is_admin) que le compte est bien administrateur
+const checkIsAdmin = async (): Promise<boolean> => {
+  const { data, error } = await supabase.rpc('is_admin');
+  return !error && data === true;
+};
+
+// Ne garde la session que si l'utilisateur est administrateur
+const resolveAdminUser = async (candidate: User | null): Promise<User | null> => {
+  if (!candidate) return null;
+  if (await checkIsAdmin()) return candidate;
+  await supabase.auth.signOut();
+  return null;
+};
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -25,16 +39,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setUser(await resolveAdminUser(session?.user ?? null));
       setLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null);
-        setLoading(false);
+      (_event, session) => {
+        // Pas d'appel Supabase directement dans ce callback (risque de blocage) :
+        // la vérification admin est différée.
+        setTimeout(async () => {
+          setUser(await resolveAdminUser(session?.user ?? null));
+          setLoading(false);
+        }, 0);
       }
     );
 
@@ -46,6 +64,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email,
       password,
     });
+    if (!error && !(await checkIsAdmin())) {
+      await supabase.auth.signOut();
+      return { data: null, error: new Error('not_admin') };
+    }
     return { data, error };
   };
 

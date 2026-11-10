@@ -294,24 +294,37 @@ export const exportData = async () => {
 // Storage management
 export const getStorageUsage = async () => {
   try {
-    const { data, error } = await supabase.storage
-      .from('restoration-photos')
-      .list();
-    
-    if (error) throw error;
-    
     let totalSize = 0;
     let fileCount = 0;
-    
-    if (data) {
-      data.forEach(file => {
-        if (file.metadata?.size) {
-          totalSize += file.metadata.size;
+
+    // Parcourt récursivement le bucket (les photos sont rangées dans des sous-dossiers)
+    const walk = async (prefix: string): Promise<void> => {
+      const pageSize = 100;
+      for (let offset = 0; ; offset += pageSize) {
+        const { data, error } = await supabase.storage
+          .from('restoration-photos')
+          .list(prefix, { limit: pageSize, offset });
+
+        if (error) throw error;
+        if (!data || data.length === 0) break;
+
+        for (const item of data) {
+          const fullPath = prefix ? `${prefix}/${item.name}` : item.name;
+          if (item.id === null) {
+            // Dossier : on descend dedans
+            await walk(fullPath);
+          } else {
+            totalSize += item.metadata?.size ?? 0;
+            fileCount++;
+          }
         }
-        fileCount++;
-      });
-    }
-    
+
+        if (data.length < pageSize) break;
+      }
+    };
+
+    await walk('');
+
     return {
       totalSize,
       fileCount,
@@ -471,16 +484,16 @@ export const getCostStatistics = async () => {
 
     const totalCost = costs?.reduce((sum, cost) => sum + parseFloat(cost.price.toString()), 0) || 0;
 
-    // Identify base purchase by category 'administrative'
-    const basePurchase = costs?.find(cost =>
-      cost.category === 'administrative'
-    ) || null;
+    // L'achat de l'épave = la plus ancienne dépense de catégorie 'administrative'.
+    // Les autres dépenses administratives (carte grise, démarches…) restent
+    // comptées dans la restauration, pour que achat + restauration = total.
+    const basePurchase = [...(costs || [])]
+      .filter(cost => cost.category === 'administrative')
+      .sort((a, b) => new Date(a.purchase_date).getTime() - new Date(b.purchase_date).getTime())[0] || null;
     const basePurchaseCost = basePurchase ? parseFloat(basePurchase.price.toString()) : 0;
 
     // Filter out base purchase from restoration costs
-    const restorationParts = costs?.filter(cost =>
-      cost.category !== 'administrative'
-    ) || [];
+    const restorationParts = costs?.filter(cost => cost !== basePurchase) || [];
     const restorationCost = restorationParts.reduce((sum, cost) => sum + parseFloat(cost.price.toString()), 0);
 
     // Calculate costs by category (excluding base purchase)
