@@ -1,0 +1,10 @@
+# Déploiement Netlify depuis GitHub
+# Les variables VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY sont à définir
+# dans Netlify : Project configuration → Environment variables.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
