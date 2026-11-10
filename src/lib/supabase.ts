@@ -275,18 +275,22 @@ export const deleteSetting = async (id: string) => {
 
 // Backup and restore
 export const exportData = async () => {
-  const [photos, events, specs, settings] = await Promise.all([
+  const [photos, events, specs, settings, partsCosts, invoices] = await Promise.all([
     getPhotos(),
     getTimelineEvents(),
     getTechnicalSpecs(),
-    getSettings()
+    getSettings(),
+    getPartsCosts(),
+    getInvoices()
   ]);
-  
+
   return {
     photos,
     timeline_events: events,
     technical_specs: specs,
     settings,
+    parts_costs: partsCosts,
+    invoices,
     exported_at: new Date().toISOString()
   };
 };

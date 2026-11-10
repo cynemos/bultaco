@@ -70,7 +70,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
         <div className="border-t border-zinc-800 mt-8 pt-8 text-center">
           <p className="text-zinc-500">
-            © 2025 Restauration Bultaco Sherpa 350. Tous droits réservés.
+            © 2025–{new Date().getFullYear()} Restauration Bultaco Sherpa 350. Tous droits réservés.
           </p>
           <p className="text-zinc-600 text-sm mt-2">
             Développé avec ❤️ pour les passionnés de motos anciennes
