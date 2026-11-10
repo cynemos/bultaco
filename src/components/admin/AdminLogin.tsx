@@ -19,7 +19,11 @@ const AdminLogin: React.FC = () => {
     try {
       const { error } = await signIn(email, password);
       if (error) {
-        setError('Email ou mot de passe incorrect');
+        setError(
+          error.message === 'not_admin'
+            ? "Ce compte n'a pas les droits d'administration"
+            : 'Email ou mot de passe incorrect'
+        );
       }
     } catch (err) {
       setError('Une erreur est survenue lors de la connexion');

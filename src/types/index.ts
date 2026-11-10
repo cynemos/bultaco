@@ -17,7 +17,7 @@ export interface TimelineEvent {
   description: string;
   status: 'completed' | 'in-progress' | 'pending';
   category: string;
-  imageUrl?: string;
+  image_url?: string;
   video_url?: string;
 }
 
