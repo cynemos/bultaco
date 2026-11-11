@@ -3,6 +3,7 @@ import { formatDateFr } from '../../lib/format';
 import { Plus, Upload, X, Edit2, Trash2, Image as ImageIcon } from 'lucide-react';
 import { getPhotos, addPhoto, updatePhoto, deletePhoto, uploadImage, removeImageByUrl } from '../../lib/supabase';
 import StepSelect from './StepSelect';
+import BulkPhotoUpload from './BulkPhotoUpload';
 
 interface Photo {
   id: string;
@@ -23,6 +24,7 @@ const PhotoManager: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [showBulk, setShowBulk] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -156,14 +158,31 @@ const PhotoManager: React.FC = () => {
           <h2 className="text-2xl font-bold text-white mb-2">Gestion des Photos</h2>
           <p className="text-zinc-400">Ajoutez et gérez les photos de la restauration</p>
         </div>
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="flex items-center space-x-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors"
-        >
-          <Plus className="h-5 w-5" />
-          <span>Ajouter une photo</span>
-        </button>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => setShowBulk(true)}
+            className="flex items-center space-x-2 bg-zinc-700 hover:bg-zinc-600 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            <Upload className="h-5 w-5" />
+            <span>Plusieurs photos</span>
+          </button>
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="flex items-center space-x-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            <Plus className="h-5 w-5" />
+            <span>Ajouter une photo</span>
+          </button>
+        </div>
       </div>
+
+      {showBulk && (
+        <BulkPhotoUpload
+          categories={categories}
+          onClose={() => setShowBulk(false)}
+          onDone={loadPhotos}
+        />
+      )}
 
       {/* Add/Edit Form */}
       {showAddForm && (

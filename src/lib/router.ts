@@ -5,7 +5,7 @@ import type { MouseEvent } from 'react';
 // du navigateur, liens partageables. Netlify renvoie toutes les adresses vers
 // index.html (voir netlify.toml).
 
-export type Section = 'home' | 'gallery' | 'timeline' | 'technical' | 'costs' | 'admin';
+export type Section = 'home' | 'gallery' | 'timeline' | 'technical' | 'costs' | 'maintenance' | 'documents' | 'dossier' | 'admin';
 
 export const SECTION_PATHS: Record<Section, string> = {
   home: '/',
@@ -13,6 +13,9 @@ export const SECTION_PATHS: Record<Section, string> = {
   timeline: '/chronologie',
   technical: '/technique',
   costs: '/couts',
+  maintenance: '/entretien',
+  documents: '/documents',
+  dossier: '/dossier',
   admin: '/admin'
 };
 
@@ -22,6 +25,9 @@ export const SECTION_TITLES: Record<Section, string> = {
   timeline: 'Chronologie',
   technical: 'Fiche technique',
   costs: 'Coûts',
+  maintenance: "Carnet d'entretien",
+  documents: 'Documents',
+  dossier: 'Dossier de restauration',
   admin: 'Administration'
 };
 

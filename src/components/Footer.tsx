@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
   const startYear = new Date(String(settings.project_start_date)).getFullYear() || 2025;
   const currentYear = new Date().getFullYear();
   return (
-    <footer className="bg-zinc-950 border-t border-zinc-800">
+    <footer className="print:hidden bg-zinc-950 border-t border-zinc-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid md:grid-cols-3 gap-8">
           <div>
@@ -68,6 +68,19 @@ const Footer: React.FC = () => {
               </a>
               <a href={SECTION_PATHS.costs} onClick={e => handleLinkClick(e, SECTION_PATHS.costs)} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
                 Coûts
+              </a>
+              {settings.show_maintenance_page && (
+                <a href={SECTION_PATHS.maintenance} onClick={e => handleLinkClick(e, SECTION_PATHS.maintenance)} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
+                  Carnet d'entretien
+                </a>
+              )}
+              {settings.show_documents_page && (
+                <a href={SECTION_PATHS.documents} onClick={e => handleLinkClick(e, SECTION_PATHS.documents)} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
+                  Documents
+                </a>
+              )}
+              <a href={SECTION_PATHS.dossier} onClick={e => handleLinkClick(e, SECTION_PATHS.dossier)} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
+                Dossier imprimable (PDF)
               </a>
             </div>
           </div>

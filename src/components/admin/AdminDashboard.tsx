@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogOut, Image, Calendar, Settings, BarChart3, Wrench, Euro, ExternalLink } from 'lucide-react';
+import { LogOut, Image, Calendar, Settings, BarChart3, Wrench, Euro, ExternalLink, Gauge, FolderOpen, Printer } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import PhotoManager from './PhotoManager';
 import TimelineManager from './TimelineManager';
@@ -7,6 +7,9 @@ import TechnicalAdmin from './TechnicalAdmin';
 import SettingsManager from './SettingsManager';
 import StatsOverview from './StatsOverview';
 import CostsManager from './CostsManager';
+import MaintenanceManager from './MaintenanceManager';
+import DocumentsManager from './DocumentsManager';
+import { SECTION_PATHS } from '../../lib/router';
 
 const TABS = [
   { id: 'stats', label: 'Aperçu', icon: BarChart3 },
@@ -14,6 +17,8 @@ const TABS = [
   { id: 'timeline', label: 'Chronologie', icon: Calendar },
   { id: 'technical', label: 'Technique', icon: Wrench },
   { id: 'costs', label: 'Coûts', icon: Euro },
+  { id: 'maintenance', label: 'Entretien', icon: Gauge },
+  { id: 'documents', label: 'Documents', icon: FolderOpen },
   { id: 'settings', label: 'Paramètres', icon: Settings },
 ];
 
@@ -59,6 +64,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onViewSite }) => {
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <span className="hidden md:inline text-zinc-400 text-sm">{user?.email}</span>
+              <a
+                href={SECTION_PATHS.dossier}
+                target="_blank"
+                rel="noopener"
+                className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg text-zinc-300 hover:text-white transition-colors"
+                title="Ouvrir le dossier de restauration imprimable (PDF)"
+              >
+                <Printer className="h-4 w-4" />
+                <span className="hidden sm:inline">Dossier PDF</span>
+              </a>
               {onViewSite && (
                 <button
                   onClick={onViewSite}
@@ -113,6 +128,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onViewSite }) => {
               {activeTab === 'timeline' && <TimelineManager />}
               {activeTab === 'technical' && <TechnicalAdmin />}
               {activeTab === 'costs' && <CostsManager />}
+              {activeTab === 'maintenance' && <MaintenanceManager />}
+              {activeTab === 'documents' && <DocumentsManager />}
               {activeTab === 'settings' && <SettingsManager />}
             </div>
           </main>

@@ -18,10 +18,12 @@ const Header: React.FC<HeaderProps> = ({ activeSection, onAdminClick }) => {
     { id: 'timeline', label: 'Chronologie' },
     { id: 'technical', label: 'Technique' },
     { id: 'costs', label: 'Coûts' },
+    ...(settings.show_maintenance_page ? [{ id: 'maintenance', label: 'Entretien' }] : []),
+    ...(settings.show_documents_page ? [{ id: 'documents', label: 'Documents' }] : []),
   ];
 
   return (
-    <header className="fixed top-0 w-full bg-zinc-900/95 backdrop-blur-sm border-b border-orange-500/20 z-50">
+    <header className="print:hidden fixed top-0 w-full bg-zinc-900/95 backdrop-blur-sm border-b border-orange-500/20 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <a href="/" onClick={e => handleLinkClick(e, '/')} className="flex items-center space-x-3">
@@ -35,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, onAdminClick }) => {
           </a>
 
           {/* Desktop Menu */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
             {menuItems.map((item) => (
               <a
                 key={item.id}
@@ -64,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, onAdminClick }) => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
+            className="lg:hidden p-2 rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 transition-colors"
           >
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -72,7 +74,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, onAdminClick }) => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-zinc-800">
+          <div className="lg:hidden py-4 border-t border-zinc-800">
             <nav className="flex flex-col space-y-2">
               {menuItems.map((item) => (
                 <a

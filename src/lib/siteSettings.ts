@@ -83,6 +83,10 @@ Avec ses 5 titres mondiaux consécutifs, la Sherpa 350T reste l'une des motos de
     help: 'Choisissez une photo de la galerie ou collez l’adresse d’une image.' },
   { key: 'after_image_url', label: 'Photo « après »', category: 'display', type: 'url', hidden: true,
     defaultValue: 'https://i.servimg.com/u/f73/20/54/60/69/img_5111.jpg' },
+  { key: 'show_maintenance_page', label: "Afficher le carnet d'entretien dans le menu", category: 'display', type: 'boolean', defaultValue: true,
+    help: 'Page /entretien : interventions, kilométrage, sorties.' },
+  { key: 'show_documents_page', label: 'Afficher la page Documents dans le menu', category: 'display', type: 'boolean', defaultValue: true,
+    help: 'Page /documents : seuls les documents marqués « public » y figurent.' },
   { key: 'gallery_items_per_page', label: 'Photos affichées par page dans la galerie', category: 'display', type: 'number', defaultValue: 12,
     help: 'Un bouton « Afficher plus » charge la suite.' },
 

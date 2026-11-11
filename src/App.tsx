@@ -12,6 +12,9 @@ import Timeline from './components/Timeline';
 import TechnicalSpecs from './components/TechnicalSpecs';
 import CostsOverview from './components/CostsOverview';
 import Footer from './components/Footer';
+import Maintenance from './components/Maintenance';
+import Documents from './components/Documents';
+import Dossier from './components/Dossier';
 import { SECTION_PATHS, SECTION_TITLES, navigate, useRoute } from './lib/router';
 
 const AppContent: React.FC = () => {
@@ -71,7 +74,7 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       {settings.maintenance_mode && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] bg-orange-500 text-white text-sm px-4 py-2 rounded-full shadow-lg">
+        <div className="print:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] bg-orange-500 text-white text-sm px-4 py-2 rounded-full shadow-lg">
           Mode maintenance actif : les visiteurs voient la page d'attente
         </div>
       )}
@@ -95,6 +98,9 @@ const AppContent: React.FC = () => {
       {activeSection === 'timeline' && <Timeline />}
       {activeSection === 'technical' && <TechnicalSpecs />}
       {activeSection === 'costs' && <CostsOverview />}
+      {activeSection === 'maintenance' && <Maintenance />}
+      {activeSection === 'documents' && <Documents />}
+      {activeSection === 'dossier' && <Dossier />}
 
       <Footer />
     </div>
