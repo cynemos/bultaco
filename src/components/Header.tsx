@@ -1,14 +1,14 @@
 import React from 'react';
 import { Menu, X, Wrench } from 'lucide-react';
 import { useSiteSettings } from '../contexts/SettingsContext';
+import { SECTION_PATHS, Section, handleLinkClick } from '../lib/router';
 
 interface HeaderProps {
   activeSection: string;
-  setActiveSection: (section: string) => void;
   onAdminClick?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, onAdminClick }) => {
+const Header: React.FC<HeaderProps> = ({ activeSection, onAdminClick }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { settings } = useSiteSettings();
 
@@ -24,7 +24,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, onAdmi
     <header className="fixed top-0 w-full bg-zinc-900/95 backdrop-blur-sm border-b border-orange-500/20 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
-          <div className="flex items-center space-x-3">
+          <a href="/" onClick={e => handleLinkClick(e, '/')} className="flex items-center space-x-3">
             <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-2 rounded-lg">
               <Wrench className="h-6 w-6 text-white" />
             </div>
@@ -32,14 +32,16 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, onAdmi
               <h1 className="text-xl font-bold text-white">{String(settings.site_title)}</h1>
               <p className="text-sm text-orange-400">Restauration {String(settings.bike_year)}</p>
             </div>
-          </div>
+          </a>
 
           {/* Desktop Menu */}
           <nav className="hidden md:flex space-x-8">
             {menuItems.map((item) => (
-              <button
+              <a
                 key={item.id}
-                onClick={() => setActiveSection(item.id)}
+                href={SECTION_PATHS[item.id as Section]}
+                onClick={e => handleLinkClick(e, SECTION_PATHS[item.id as Section])}
+                aria-current={activeSection === item.id ? 'page' : undefined}
                 className={`px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
                   activeSection === item.id
                     ? 'bg-orange-500 text-white shadow-lg'
@@ -47,7 +49,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, onAdmi
                 }`}
               >
                 {item.label}
-              </button>
+              </a>
             ))}
             {onAdminClick && (
               <button
@@ -73,12 +75,11 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, onAdmi
           <div className="md:hidden py-4 border-t border-zinc-800">
             <nav className="flex flex-col space-y-2">
               {menuItems.map((item) => (
-                <button
+                <a
                   key={item.id}
-                  onClick={() => {
-                    setActiveSection(item.id);
-                    setIsMenuOpen(false);
-                  }}
+                  href={SECTION_PATHS[item.id as Section]}
+                  onClick={e => handleLinkClick(e, SECTION_PATHS[item.id as Section], () => setIsMenuOpen(false))}
+                  aria-current={activeSection === item.id ? 'page' : undefined}
                   className={`px-4 py-3 rounded-lg text-left transition-all duration-300 ${
                     activeSection === item.id
                       ? 'bg-orange-500 text-white'
@@ -86,7 +87,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, onAdmi
                   }`}
                 >
                   {item.label}
-                </button>
+                </a>
               ))}
               {onAdminClick && (
                 <button

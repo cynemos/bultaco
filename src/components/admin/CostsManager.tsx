@@ -13,6 +13,7 @@ import {
 } from '../../lib/supabase';
 import { PartCost, Invoice } from '../../types';
 import { COST_CATEGORIES, PURCHASE_CATEGORY, isPartCategory } from '../../lib/costCategories';
+import StepSelect from './StepSelect';
 
 const CostsManager: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'parts' | 'invoices' | 'stats'>('parts');
@@ -36,6 +37,7 @@ const CostsManager: React.FC = () => {
     supplier: '',
     purchase_date: new Date().toISOString().split('T')[0],
     invoice_id: '',
+    timeline_event_id: '',
     notes: ''
   });
 
@@ -102,6 +104,7 @@ const CostsManager: React.FC = () => {
       } else {
         partData.invoice_id = null;
       }
+      partData.timeline_event_id = partFormData.timeline_event_id || null;
 
       if (editingItem && 'part_name' in editingItem) {
         await updatePartCost(editingItem.id, partData);
@@ -163,6 +166,7 @@ const CostsManager: React.FC = () => {
       supplier: part.supplier || '',
       purchase_date: part.purchase_date,
       invoice_id: part.invoice_id || '',
+      timeline_event_id: part.timeline_event_id || '',
       notes: part.notes || ''
     });
     setShowAddForm(true);
@@ -217,6 +221,7 @@ const CostsManager: React.FC = () => {
       supplier: '',
       purchase_date: new Date().toISOString().split('T')[0],
       invoice_id: '',
+      timeline_event_id: '',
       notes: ''
     });
     setInvoiceFormData({
@@ -469,6 +474,13 @@ const CostsManager: React.FC = () => {
                     ))}
                   </select>
                 </div>
+
+                {partFormData.category !== PURCHASE_CATEGORY && (
+                  <StepSelect
+                    value={partFormData.timeline_event_id}
+                    onChange={stepId => setPartFormData({ ...partFormData, timeline_event_id: stepId })}
+                  />
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-zinc-300 mb-2">

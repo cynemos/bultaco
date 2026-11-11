@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Wrench } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SettingsProvider, useSiteSettings } from './contexts/SettingsContext';
@@ -12,12 +12,21 @@ import Timeline from './components/Timeline';
 import TechnicalSpecs from './components/TechnicalSpecs';
 import CostsOverview from './components/CostsOverview';
 import Footer from './components/Footer';
+import { SECTION_PATHS, SECTION_TITLES, navigate, useRoute } from './lib/router';
 
 const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
-  const [activeSection, setActiveSection] = useState('home');
-  const [showAdmin, setShowAdmin] = useState(false);
+  const { section, goTo } = useRoute();
+  const activeSection = section;
+  const showAdmin = section === 'admin';
+  const setShowAdmin = (open: boolean) => navigate(open ? SECTION_PATHS.admin : SECTION_PATHS.home);
   const { settings, reload: reloadSettings } = useSiteSettings();
+
+  // Titre de l'onglet selon la page
+  useEffect(() => {
+    const site = String(settings.site_title);
+    document.title = section === 'home' ? `${site} — Restauration` : `${SECTION_TITLES[section]} — ${site}`;
+  }, [section, settings.site_title]);
 
   // Une fois connecté, l'admin lit aussi les paramètres non publics
   useEffect(() => {
@@ -66,19 +75,15 @@ const AppContent: React.FC = () => {
           Mode maintenance actif : les visiteurs voient la page d'attente
         </div>
       )}
-      <Header 
-        activeSection={activeSection} 
-        setActiveSection={setActiveSection}
+      <Header
+        activeSection={activeSection}
         onAdminClick={() => setShowAdmin(true)}
       />
       
       {activeSection === 'home' && (
         <>
           <HeroSection
-            onDiscover={() => {
-              setActiveSection('timeline');
-              window.scrollTo({ top: 0 });
-            }}
+            onDiscover={() => goTo('timeline')}
           />
           <div className="py-16">
             <BeforeAfter />
@@ -91,7 +96,7 @@ const AppContent: React.FC = () => {
       {activeSection === 'technical' && <TechnicalSpecs />}
       {activeSection === 'costs' && <CostsOverview />}
 
-      <Footer onNavigate={setActiveSection} />
+      <Footer />
     </div>
   );
 };

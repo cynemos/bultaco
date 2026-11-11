@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, CreditCard as Edit2, Trash2, X, Calendar, Clock, CheckCircle, Circle, AlertCircle, Upload, Youtube } from 'lucide-react';
+import { Plus, CreditCard as Edit2, Trash2, X, Calendar, Clock, CheckCircle, Circle, AlertCircle, Upload, Youtube, Link2 } from 'lucide-react';
 import { getTimelineEvents, addTimelineEvent, updateTimelineEvent, deleteTimelineEvent, uploadImage, removeImageByUrl } from '../../lib/supabase';
 import { TimelineEvent } from '../../types';
+import StepLinksModal from './StepLinksModal';
 
 
 const TimelineManager: React.FC = () => {
@@ -13,6 +14,7 @@ const TimelineManager: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [linkingStep, setLinkingStep] = useState<TimelineEvent | null>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -417,6 +419,14 @@ const TimelineManager: React.FC = () => {
                 </div>
                 <div className="flex space-x-2">
                   <button
+                    onClick={() => setLinkingStep(event)}
+                    className="flex items-center gap-1.5 bg-zinc-700 hover:bg-zinc-600 text-white px-3 py-2 rounded-lg transition-colors text-sm"
+                    title="Associer des photos et des dépenses à cette étape"
+                  >
+                    <Link2 className="h-4 w-4" />
+                    <span className="hidden sm:inline">Associer</span>
+                  </button>
+                  <button
                     onClick={() => handleEdit(event)}
                     className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg transition-colors"
                   >
@@ -467,6 +477,15 @@ const TimelineManager: React.FC = () => {
             Ajouter la première étape
           </button>
         </div>
+      )}
+
+      {linkingStep && (
+        <StepLinksModal
+          step={linkingStep}
+          steps={events}
+          onClose={() => setLinkingStep(null)}
+          onSaved={() => setLinkingStep(null)}
+        />
       )}
     </div>
   );

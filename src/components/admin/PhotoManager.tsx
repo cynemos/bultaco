@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Upload, X, Edit2, Trash2, Image as ImageIcon } from 'lucide-react';
 import { getPhotos, addPhoto, updatePhoto, deletePhoto, uploadImage, removeImageByUrl } from '../../lib/supabase';
+import StepSelect from './StepSelect';
 
 interface Photo {
   id: string;
@@ -10,6 +11,7 @@ interface Photo {
   category: string;
   date: string;
   tags: string[];
+  timeline_event_id?: string | null;
   is_before_photo?: boolean;
   is_after_photo?: boolean;
 }
@@ -27,6 +29,7 @@ const PhotoManager: React.FC = () => {
     category: 'engine',
     date: new Date().toISOString().split('T')[0],
     tags: '',
+    timeline_event_id: '',
     file: null as File | null
   });
 
@@ -81,7 +84,8 @@ const PhotoManager: React.FC = () => {
         description: formData.description,
         category: formData.category,
         date: formData.date,
-        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        timeline_event_id: formData.timeline_event_id || null
       };
 
       if (editingPhoto) {
@@ -112,6 +116,7 @@ const PhotoManager: React.FC = () => {
       category: photo.category,
       date: photo.date,
       tags: photo.tags.join(', '),
+      timeline_event_id: photo.timeline_event_id || '',
       file: null
     });
     setShowAddForm(true);
@@ -136,6 +141,7 @@ const PhotoManager: React.FC = () => {
       category: 'engine',
       date: new Date().toISOString().split('T')[0],
       tags: '',
+      timeline_event_id: '',
       file: null
     });
     setEditingPhoto(null);
@@ -234,6 +240,11 @@ const PhotoManager: React.FC = () => {
                   </select>
                 </div>
               </div>
+
+              <StepSelect
+                value={formData.timeline_event_id}
+                onChange={stepId => setFormData({ ...formData, timeline_event_id: stepId })}
+              />
 
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-2">

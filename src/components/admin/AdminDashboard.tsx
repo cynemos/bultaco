@@ -3,7 +3,7 @@ import { LogOut, Image, Calendar, Settings, BarChart3, Wrench, Euro, ExternalLin
 import { useAuth } from '../../contexts/AuthContext';
 import PhotoManager from './PhotoManager';
 import TimelineManager from './TimelineManager';
-import TechnicalSpecsManager from './TechnicalSpecsManager';
+import TechnicalAdmin from './TechnicalAdmin';
 import SettingsManager from './SettingsManager';
 import StatsOverview from './StatsOverview';
 import CostsManager from './CostsManager';
@@ -111,7 +111,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onViewSite }) => {
               {activeTab === 'stats' && <StatsOverview />}
               {activeTab === 'photos' && <PhotoManager />}
               {activeTab === 'timeline' && <TimelineManager />}
-              {activeTab === 'technical' && <TechnicalSpecsManager />}
+              {activeTab === 'technical' && <TechnicalAdmin />}
               {activeTab === 'costs' && <CostsManager />}
               {activeTab === 'settings' && <SettingsManager />}
             </div>
