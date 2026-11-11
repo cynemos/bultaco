@@ -1,15 +1,19 @@
 import React from 'react';
 import { Calendar, MapPin, Cog } from 'lucide-react';
+import { useSiteSettings } from '../contexts/SettingsContext';
 
 const HeroSection: React.FC = () => {
+  const { settings } = useSiteSettings();
+  const year = String(settings.bike_year);
+  const model = String(settings.bike_model);
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background with overlay */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-zinc-900/90 to-black/80 z-10"></div>
         <img
-          src="https://images.pexels.com/photos/279949/pexels-photo-279949.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop"
-          alt="Vintage motorcycle"
+          src={String(settings.hero_image_url)}
+          alt=""
           className="w-full h-full object-cover"
         />
       </div>
@@ -17,10 +21,10 @@ const HeroSection: React.FC = () => {
       <div className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="mb-8">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
-            Bultaco Sherpa 350
+            {String(settings.site_title)}
           </h1>
           <p className="text-2xl md:text-3xl text-zinc-300 font-light mb-8">
-            Renaissance d'une légende de 1976
+            Renaissance d'une légende de {year}
           </p>
         </div>
 
@@ -28,7 +32,7 @@ const HeroSection: React.FC = () => {
           <div className="bg-zinc-900/60 backdrop-blur-sm p-6 rounded-xl border border-orange-500/20">
             <Calendar className="h-8 w-8 text-orange-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">Année</h3>
-            <p className="text-zinc-400">1976 - Modèle authentique</p>
+            <p className="text-zinc-400">{year} - Modèle authentique</p>
           </div>
           
           <div className="bg-zinc-900/60 backdrop-blur-sm p-6 rounded-xl border border-orange-500/20">
@@ -47,7 +51,7 @@ const HeroSection: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold mb-6 text-orange-400">Le Projet</h2>
           <p className="text-lg text-zinc-300 leading-relaxed mb-8">
-            Cette Bultaco Sherpa 350 de 1976, icône du trial espagnol, était à l'abandon depuis des décennies. 
+            Cette Bultaco {model} de {year}, icône du trial espagnol, était à l'abandon depuis des décennies. 
             Moteur grippé, carrosserie rouillée, électricité défaillante... Un défi de taille pour redonner vie 
             à cette machine légendaire qui a marqué l'histoire du trial mondial.
           </p>

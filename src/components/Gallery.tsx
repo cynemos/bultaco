@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Filter, ZoomIn } from 'lucide-react';
 import { getPhotos } from '../lib/supabase';
+import { useSiteSettings } from '../contexts/SettingsContext';
 
 const Gallery: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -8,6 +9,14 @@ const Gallery: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [photos, setPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const { settings } = useSiteSettings();
+  const pageSize = Math.max(1, Number(settings.gallery_items_per_page) || 12);
+  const [visibleCount, setVisibleCount] = useState(pageSize);
+
+  // Nouvelle recherche ou nouveau filtre : on repart de la première page
+  React.useEffect(() => {
+    setVisibleCount(pageSize);
+  }, [selectedCategory, searchTerm, pageSize]);
 
   // Load photos on component mount
   React.useEffect(() => {
@@ -32,7 +41,9 @@ const Gallery: React.FC = () => {
     { id: 'bodywork', label: 'Carrosserie', count: 6 },
     { id: 'electrical', label: 'Électricité', count: 4 },
     { id: 'wheels', label: 'Roues & Freins', count: 3 },
-    { id: 'restoration', label: 'Restauration', count: 3 }
+    { id: 'restoration', label: 'Restauration', count: 3 },
+    { id: 'assembly', label: 'Assemblage', count: 0 },
+    { id: 'testing', label: 'Tests', count: 0 }
   ];
 
   const filteredImages = photos.filter(image => {
@@ -46,7 +57,9 @@ const Gallery: React.FC = () => {
   const updatedCategories = categories.map(cat => ({
     ...cat,
     count: cat.id === 'all' ? photos.length : photos.filter(p => p.category === cat.id).length
-  }));
+  })).filter(cat => cat.id === 'all' || cat.count > 0);
+
+  const visibleImages = filteredImages.slice(0, visibleCount);
   return (
     <section className="pt-24 pb-16 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -102,7 +115,7 @@ const Gallery: React.FC = () => {
         {/* Image Grid */}
         {!loading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredImages.map((image) => (
+          {visibleImages.map((image) => (
             <div
               key={image.id}
               className="group relative bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/10"
@@ -137,6 +150,17 @@ const Gallery: React.FC = () => {
           </div>
         )}
 
+        {!loading && visibleCount < filteredImages.length && (
+          <div className="text-center mt-10">
+            <button
+              onClick={() => setVisibleCount(count => count + pageSize)}
+              className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full font-medium transition-colors"
+            >
+              Afficher plus ({filteredImages.length - visibleCount} restantes)
+            </button>
+          </div>
+        )}
+
         {!loading && filteredImages.length === 0 && (
           <div className="text-center py-12">
             <div className="text-zinc-500 mb-4">
@@ -152,7 +176,7 @@ const Gallery: React.FC = () => {
             onClick={() => setSelectedImage(null)}
           >
             <div className="relative max-w-5xl max-h-full">
-              <img loading="lazy" decoding="async"
+              <img
                 src={selectedImage}
                 alt="Photo agrandie"
                 className="max-w-full max-h-full object-contain rounded-lg"

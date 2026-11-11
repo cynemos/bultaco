@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, CheckCircle, Circle, AlertCircle } from 'lucide-react';
 import { getTimelineEvents } from '../lib/supabase';
 import { TimelineEvent } from '../types';
+import { useSiteSettings } from '../contexts/SettingsContext';
 
 const getYouTubeEmbedUrl = (url: string): string | null => {
   const patterns = [
@@ -15,6 +16,7 @@ const getYouTubeEmbedUrl = (url: string): string | null => {
 };
 
 const Timeline: React.FC = () => {
+  const { settings } = useSiteSettings();
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -80,7 +82,7 @@ const Timeline: React.FC = () => {
             Timeline de Restauration
           </h1>
           <p className="text-xl text-zinc-400 max-w-3xl mx-auto">
-            Suivez chronologiquement chaque étape de la restauration de la Bultaco Sherpa 350
+            Suivez chronologiquement chaque étape de la restauration de la Bultaco {String(settings.bike_model)}
           </p>
         </div>
 

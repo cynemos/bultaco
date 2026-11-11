@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { ArrowLeftRight } from 'lucide-react';
+import { useSiteSettings } from '../contexts/SettingsContext';
 
 const BeforeAfter: React.FC = () => {
+  const { settings } = useSiteSettings();
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -54,7 +56,7 @@ const BeforeAfter: React.FC = () => {
             Avant / Après
           </h2>
           <p className="text-xl text-zinc-400 max-w-3xl mx-auto">
-            Glissez le curseur pour découvrir la transformation spectaculaire de la Sherpa
+            Glissez le curseur pour découvrir la transformation spectaculaire de la moto
           </p>
         </div>
 
@@ -73,7 +75,7 @@ const BeforeAfter: React.FC = () => {
             {/* Before Image */}
             <div className="absolute inset-0">
               <img loading="lazy" decoding="async"
-                src="https://i.servimg.com/u/f28/12/40/02/10/trial-12.jpg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop"
+                src={String(settings.before_image_url)}
                 alt="Avant restauration"
                 className="w-full h-full object-cover"
               />
@@ -89,7 +91,7 @@ const BeforeAfter: React.FC = () => {
               style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
             >
               <img loading="lazy" decoding="async"
-                src="https://i.servimg.com/u/f73/20/54/60/69/img_5111.jpg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop"
+                src={String(settings.after_image_url)}
                 alt="Après restauration"
                 className="w-full h-full object-cover"
               />

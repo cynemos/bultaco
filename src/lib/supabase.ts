@@ -284,38 +284,20 @@ export const getSettingByKey = async (key: string) => {
   return data;
 };
 
-export const updateSetting = async (key: string, value: any, description?: string) => {
-  const { data, error } = await supabase
-    .from('settings')
-    .update({ 
-      value: JSON.stringify(value),
-      description,
-      updated_at: new Date().toISOString()
-    })
-    .eq('key', key)
-    .select();
-  
-  if (error) throw error;
-  return data[0];
-};
-
-export const addSetting = async (setting: {
+// Enregistre plusieurs paramètres d'un coup (création ou mise à jour selon la clé).
+// La colonne value est en jsonb : on envoie la valeur telle quelle, sans JSON.stringify.
+export const saveSettings = async (rows: {
   key: string;
-  value: any;
+  value: string | number | boolean;
   category: string;
   description?: string;
-  is_public?: boolean;
-}) => {
-  const { data, error } = await supabase
+  is_public: boolean;
+}[]) => {
+  const { error } = await supabase
     .from('settings')
-    .insert([{
-      ...setting,
-      value: JSON.stringify(setting.value)
-    }])
-    .select();
-  
+    .upsert(rows, { onConflict: 'key' });
+
   if (error) throw error;
-  return data[0];
 };
 
 export const deleteSetting = async (id: string) => {
