@@ -38,6 +38,10 @@ export const SETTING_DEFINITIONS: SettingDefinition[] = [
 
   { key: 'project_start_date', label: 'Début du projet', category: 'project', type: 'date', defaultValue: '2025-08-01',
     help: 'Affiché dans le pied de page et sur la page Coûts (mois et année).' },
+  { key: 'work_hours', label: 'Heures de travail personnel', category: 'project', type: 'number', defaultValue: 200,
+    help: "Estimation du temps passé. Affichée sur l'accueil et la page Coûts (0 pour la masquer)." },
+  { key: 'work_hourly_rate', label: 'Valorisation horaire (€/h, facultatif)', category: 'project', type: 'number', defaultValue: 0,
+    help: "0 = pas de valorisation. Sinon, la page Coûts indique ce que représenterait ce travail, sans l'ajouter au prix de revient." },
 
   { key: 'owner_name', label: 'Nom du propriétaire', category: 'contact', type: 'text', defaultValue: '',
     help: 'Affiché dans le copyright du pied de page (laisser vide pour le masquer).' },

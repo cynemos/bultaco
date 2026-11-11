@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Image, Calendar, Euro, Package, Wrench, FileText, Bike } from 'lucide-react';
 import { getPhotos, getTimelineEvents, getTechnicalSpecs, getCostStatistics, CostStatistics } from '../../lib/supabase';
 import AdvancedStats from './AdvancedStats';
+import { useSiteSettings } from '../../contexts/SettingsContext';
 
 interface Activity {
   action: string;
@@ -38,6 +39,8 @@ const getRelativeTime = (date: Date) => {
 
 const StatsOverview: React.FC = () => {
   const [loading, setLoading] = useState(true);
+  const { settings } = useSiteSettings();
+  const workHours = Math.max(0, Number(settings.work_hours) || 0);
   const [error, setError] = useState('');
   const [photoCount, setPhotoCount] = useState(0);
   const [specCount, setSpecCount] = useState(0);
@@ -122,7 +125,7 @@ const StatsOverview: React.FC = () => {
   const costCards = [
     { title: 'Achat de la moto', value: costStatistics.purchaseCost, icon: Bike, color: 'text-rose-400', bg: 'bg-rose-500/20' },
     { title: `Pièces (${costStatistics.totalParts || 0})`, value: costStatistics.partsCost, icon: Package, color: 'text-blue-400', bg: 'bg-blue-500/20' },
-    { title: "Main d'œuvre", value: costStatistics.labourCost, icon: Wrench, color: 'text-teal-400', bg: 'bg-teal-500/20' },
+    { title: workHours > 0 ? `Main d'œuvre (+ ≈ ${workHours} h perso)` : "Main d'œuvre", value: costStatistics.labourCost, icon: Wrench, color: 'text-teal-400', bg: 'bg-teal-500/20' },
     { title: 'Administratif', value: costStatistics.administrativeCost, icon: FileText, color: 'text-indigo-400', bg: 'bg-indigo-500/20' },
     { title: 'Prix de revient', value: costStatistics.totalCost, icon: Euro, color: 'text-orange-400', bg: 'bg-orange-500/20' }
   ];

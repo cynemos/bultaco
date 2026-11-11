@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Euro, Package, PieChart, Info, Wrench, FileText, Bike } from 'lucide-react';
+import { Euro, Package, PieChart, Info, Wrench, FileText, Bike, Clock } from 'lucide-react';
 import { getPartsCosts, getCostStatistics, CostStatistics } from '../lib/supabase';
 import { COST_CATEGORIES, PURCHASE_CATEGORY } from '../lib/costCategories';
 import { useSiteSettings } from '../contexts/SettingsContext';
@@ -12,6 +12,9 @@ const CostsOverview: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { settings } = useSiteSettings();
+  const workHours = Math.max(0, Number(settings.work_hours) || 0);
+  const hourlyRate = Math.max(0, Number(settings.work_hourly_rate) || 0);
+  const formatHours = (hours: number) => `${new Intl.NumberFormat('fr-FR').format(hours)} h`;
 
   const categories = [
     { value: 'all', label: 'Toutes', color: 'text-orange-400' },
@@ -106,7 +109,17 @@ const CostsOverview: React.FC = () => {
           {[
             { label: 'Achat de la moto', value: statistics.purchaseCost, icon: Bike, tint: 'bg-rose-500/20 text-rose-400', hint: "Prix d'achat de l'épave" },
             { label: 'Pièces', value: statistics.partsCost, icon: Package, tint: 'bg-blue-500/20 text-blue-400', hint: `${statistics.totalParts || 0} pièces et fournitures` },
-            { label: "Main d'œuvre", value: statistics.labourCost, icon: Wrench, tint: 'bg-teal-500/20 text-teal-400', hint: 'Usinage, prestations' },
+            {
+              label: "Main d'œuvre",
+              value: statistics.labourCost,
+              // Travail fait soi-même : on affiche les heures plutôt que 0 €
+              display: !statistics.labourCost && workHours > 0 ? `≈ ${formatHours(workHours)}` : undefined,
+              icon: Wrench,
+              tint: 'bg-teal-500/20 text-teal-400',
+              hint: workHours > 0
+                ? (statistics.labourCost ? `+ ≈ ${formatHours(workHours)} de travail personnel` : 'Tout fait maison : 0 € dépensé')
+                : 'Usinage, prestations'
+            },
             { label: 'Administratif', value: statistics.administrativeCost, icon: FileText, tint: 'bg-indigo-500/20 text-indigo-400', hint: 'Assurance, FFVE, carte grise…' }
           ].map(card => (
             <div key={card.label} className="bg-zinc-900 rounded-xl p-6 border border-zinc-800">
@@ -114,7 +127,7 @@ const CostsOverview: React.FC = () => {
                 <card.icon className="h-6 w-6" />
               </div>
               <div className="text-2xl font-bold text-white mb-1">
-                {formatPrice(card.value || 0, 'EUR')}
+                {'display' in card && card.display ? card.display : formatPrice(card.value || 0, 'EUR')}
               </div>
               <div className="text-sm text-zinc-300">{card.label}</div>
               <div className="text-xs text-zinc-500 mt-1">{card.hint}</div>
@@ -150,6 +163,29 @@ const CostsOverview: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Travail personnel */}
+        {workHours > 0 && (
+          <div className="bg-zinc-900 rounded-xl p-6 sm:p-8 border border-teal-500/30 mb-12 flex flex-col sm:flex-row items-center gap-6">
+            <div className="bg-teal-500/20 p-4 rounded-2xl">
+              <Clock className="h-10 w-10 text-teal-400" />
+            </div>
+            <div className="text-center sm:text-left">
+              <div className="text-3xl font-bold text-teal-400">≈ {formatHours(workHours)} de travail</div>
+              <p className="text-zinc-300 mt-2">
+                Démontage, mécanique, peinture, remontage : toute la main d'œuvre a été réalisée à la maison.
+                Ce temps n'apparaît pas dans le prix de revient, mais c'est la vraie richesse de cette restauration.
+              </p>
+              {hourlyRate > 0 && (
+                <p className="text-zinc-500 text-sm mt-2">
+                  À titre indicatif, à {formatPrice(hourlyRate, 'EUR')}/h, ce travail représenterait environ{' '}
+                  <span className="text-teal-300 font-semibold">{formatPrice(workHours * hourlyRate, 'EUR')}</span>
+                  {' '}(non compté dans le total).
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Category Filter */}
         <div className="mb-8">
