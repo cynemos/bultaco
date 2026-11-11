@@ -7,9 +7,8 @@ interface HeroSectionProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ onDiscover }) => {
-  const { settings } = useSiteSettings();
+  const { settings, fill } = useSiteSettings();
   const year = String(settings.bike_year);
-  const model = String(settings.bike_model);
   const workHours = Math.max(0, Number(settings.work_hours) || 0);
   const heroImage = String(settings.hero_image_url || '');
   const overlay = Math.max(0, Math.min(95, Number(settings.hero_overlay_opacity) || 0)) / 100;
@@ -61,13 +60,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onDiscover }) => {
           <div className="bg-zinc-900/60 backdrop-blur-sm p-6 rounded-xl border border-orange-500/20">
             <MapPin className="h-8 w-8 text-orange-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">Origine</h3>
-            <p className="text-zinc-400">Bultaco, Espagne</p>
+            <p className="text-zinc-400">{String(settings.hero_origin)}</p>
           </div>
           
           <div className="bg-zinc-900/60 backdrop-blur-sm p-6 rounded-xl border border-orange-500/20">
             <Cog className="h-8 w-8 text-orange-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">État initial</h3>
-            <p className="text-zinc-400">Épave - Moteur bloqué</p>
+            <p className="text-zinc-400">{String(settings.hero_initial_state)}</p>
           </div>
 
           {workHours > 0 && (
@@ -82,16 +81,18 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onDiscover }) => {
 
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold mb-6 text-orange-400">Le Projet</h2>
-          <p className="text-lg text-zinc-300 leading-relaxed mb-8">
-            Cette Bultaco {model} de {year}, icône du trial espagnol, était à l'abandon depuis des décennies. 
-            Moteur grippé, carrosserie rouillée, électricité défaillante... Un défi de taille pour redonner vie 
-            à cette machine légendaire qui a marqué l'histoire du trial mondial.
-          </p>
-          <p className="text-lg text-zinc-300 leading-relaxed">
-            Suivez chaque étape de cette restauration méticuleuse : du démontage complet à la remise en route, 
-            en passant par la réfection du moteur, la restauration de la carrosserie et la modernisation 
-            discrète de certains composants pour allier authenticité et fiabilité.
-          </p>
+          {fill(String(settings.hero_project_text))
+            .split(/\n\s*\n/)
+            .map(paragraph => paragraph.trim())
+            .filter(Boolean)
+            .map((paragraph, index, all) => (
+              <p
+                key={index}
+                className={`text-lg text-zinc-300 leading-relaxed whitespace-pre-line ${index < all.length - 1 ? 'mb-8' : ''}`}
+              >
+                {paragraph}
+              </p>
+            ))}
         </div>
 
         <div className="mt-12">

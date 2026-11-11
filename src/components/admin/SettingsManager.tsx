@@ -22,6 +22,7 @@ import {
   decodeSettingValue
 } from '../../lib/siteSettings';
 import { useSiteSettings } from '../../contexts/SettingsContext';
+import { CONTENT_KEYS } from '../../lib/siteContent';
 import { Setting } from '../../types';
 import ImagePicker from './ImagePicker';
 import ExternalImagesPanel from './ExternalImagesPanel';
@@ -78,7 +79,10 @@ const SettingsManager: React.FC = () => {
   );
 
   // Paramètres présents en base mais inconnus du site (anciens essais, fonctions abandonnées)
-  const unknownRows = rows.filter(row => !SETTING_DEFINITIONS.some(d => d.key === row.key));
+  const contentKeys: string[] = Object.values(CONTENT_KEYS);
+  const unknownRows = rows.filter(
+    row => !SETTING_DEFINITIONS.some(d => d.key === row.key) && !contentKeys.includes(row.key)
+  );
 
   const handleSave = async () => {
     try {

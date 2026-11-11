@@ -35,7 +35,8 @@ const Timeline: React.FC = () => {
   useEffect(() => {
     if (!hash || loading) return;
     const target = document.getElementById(hash);
-    if (target) setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    // Saut direct (le défilement « doux » est ignoré par certains navigateurs à l'arrivée sur la page)
+    if (target) setTimeout(() => target.scrollIntoView({ block: 'start' }), 100);
   }, [hash, loading]);
 
   const copyStepLink = async (slug: string) => {

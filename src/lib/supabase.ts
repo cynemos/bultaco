@@ -371,7 +371,7 @@ export const getSettingByKey = async (key: string) => {
 // La colonne value est en jsonb : on envoie la valeur telle quelle, sans JSON.stringify.
 export const saveSettings = async (rows: {
   key: string;
-  value: string | number | boolean;
+  value: unknown;
   category: string;
   description?: string;
   is_public: boolean;

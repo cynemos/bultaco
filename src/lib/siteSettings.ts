@@ -21,6 +21,7 @@ export const SETTING_CATEGORIES = [
   { id: 'general', label: 'Général' },
   { id: 'bike', label: 'Moto' },
   { id: 'project', label: 'Projet' },
+  { id: 'texts', label: 'Textes du site' },
   { id: 'contact', label: 'Contact' },
   { id: 'display', label: 'Affichage' },
   { id: 'system', label: 'Système' }
@@ -46,6 +47,19 @@ export const SETTING_DEFINITIONS: SettingDefinition[] = [
     help: "Estimation du temps passé. Affichée sur l'accueil et la page Coûts (0 pour la masquer)." },
   { key: 'work_hourly_rate', label: 'Valorisation horaire (€/h, facultatif)', category: 'project', type: 'number', defaultValue: 0,
     help: "0 = pas de valorisation. Sinon, la page Coûts indique ce que représenterait ce travail, sans l'ajouter au prix de revient." },
+
+  { key: 'hero_origin', label: 'Accueil — carte « Origine »', category: 'texts', type: 'text', defaultValue: 'Bultaco, Espagne' },
+  { key: 'hero_initial_state', label: 'Accueil — carte « État initial »', category: 'texts', type: 'text', defaultValue: 'Épave - Moteur bloqué' },
+  { key: 'hero_project_text', label: 'Accueil — texte « Le Projet »', category: 'texts', type: 'textarea',
+    defaultValue: `Cette Bultaco {modele} de {annee}, icône du trial espagnol, était à l'abandon depuis des décennies. Moteur grippé, carrosserie rouillée, électricité défaillante... Un défi de taille pour redonner vie à cette machine légendaire qui a marqué l'histoire du trial mondial.
+
+Suivez chaque étape de cette restauration méticuleuse : du démontage complet à la remise en route, en passant par la réfection du moteur, la restauration de la carrosserie et la modernisation discrète de certains composants pour allier authenticité et fiabilité.`,
+    help: 'Laissez une ligne vide entre deux paragraphes. Vous pouvez écrire {modele}, {annee} et {mise_en_circulation} : ils seront remplacés automatiquement.' },
+  { key: 'tech_heritage_text', label: 'Fiche technique — « L’Héritage Bultaco »', category: 'texts', type: 'textarea',
+    defaultValue: `La Bultaco Sherpa 350T de {annee} représente l'apogée de l'ingénierie espagnole en matière de trial. Conçue par Francisco Xavier \"Paco\" Bultó, cette machine révolutionnaire a redéfini les standards du trial mondial grâce à son moteur 2 temps performant et son châssis ultra-léger.
+
+Avec ses 5 titres mondiaux consécutifs, la Sherpa 350T reste l'une des motos de trial les plus titrées de l'histoire. Sa restauration à l'identique permet de préserver ce patrimoine mécanique exceptionnel et de perpétuer la légende Bultaco.`,
+    help: 'Laissez une ligne vide entre deux paragraphes. Vous pouvez écrire {modele}, {annee} et {mise_en_circulation} : ils seront remplacés automatiquement.' },
 
   { key: 'owner_name', label: 'Nom du propriétaire', category: 'contact', type: 'text', defaultValue: '',
     help: 'Affiché dans le copyright du pied de page (laisser vide pour le masquer).' },
