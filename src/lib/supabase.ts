@@ -90,6 +90,68 @@ export const removeImageByUrl = async (url?: string | null) => {
   if (error) console.error("Impossible de supprimer l'image du stockage :", error);
 };
 
+// Images hébergées ailleurs que dans le stockage du site (servimg, Pexels…)
+// Elles peuvent disparaître si le service les supprime : on les rapatrie.
+export interface ExternalImage {
+  table: 'photos' | 'timeline_events' | 'settings';
+  id: string; // id de la ligne (ou clé du paramètre)
+  field: 'url' | 'image_url' | 'value';
+  url: string;
+  label: string;
+  folder: string;
+}
+
+const isOwnStorageUrl = (url: string) => url.includes(`/object/public/${PHOTO_BUCKET}/`);
+const isHttpUrl = (url: unknown): url is string => typeof url === 'string' && /^https?:\/\//.test(url);
+
+export const listExternalImages = async (): Promise<ExternalImage[]> => {
+  const [photos, events, settings] = await Promise.all([
+    supabase.from('photos').select('id, url, title'),
+    supabase.from('timeline_events').select('id, image_url, title'),
+    supabase.from('settings').select('key, value, description').in('key', ['hero_image_url', 'before_image_url', 'after_image_url'])
+  ]);
+  const error = photos.error || events.error || settings.error;
+  if (error) throw error;
+
+  const found: ExternalImage[] = [];
+  for (const p of photos.data || []) {
+    if (isHttpUrl(p.url) && !isOwnStorageUrl(p.url)) {
+      found.push({ table: 'photos', id: p.id, field: 'url', url: p.url, label: `Galerie : ${p.title}`, folder: 'photos' });
+    }
+  }
+  for (const e of events.data || []) {
+    if (isHttpUrl(e.image_url) && !isOwnStorageUrl(e.image_url)) {
+      found.push({ table: 'timeline_events', id: e.id, field: 'image_url', url: e.image_url, label: `Chronologie : ${e.title}`, folder: 'timeline' });
+    }
+  }
+  for (const row of settings.data || []) {
+    if (isHttpUrl(row.value) && !isOwnStorageUrl(row.value)) {
+      found.push({ table: 'settings', id: row.key, field: 'value', url: row.value, label: `Paramètre : ${row.description || row.key}`, folder: 'site' });
+    }
+  }
+  return found;
+};
+
+// Télécharge l'image externe, l'enregistre dans le stockage du site et met à jour la ligne
+export const rehostImage = async (image: ExternalImage): Promise<string> => {
+  const response = await fetch(image.url);
+  if (!response.ok) throw new Error(`Image inaccessible (${response.status})`);
+  const blob = await response.blob();
+  if (!blob.type.startsWith('image/')) throw new Error("Le lien ne pointe pas vers une image");
+  const name = image.url.split('?')[0].split('/').pop() || 'image.jpg';
+  const newUrl = await uploadImage(new File([blob], name, { type: blob.type }), image.folder);
+
+  const query = image.table === 'settings'
+    ? supabase.from('settings').update({ value: newUrl }).eq('key', image.id)
+    : supabase.from(image.table).update({ [image.field]: newUrl }).eq('id', image.id);
+  const { error } = await query;
+  if (error) {
+    await removeImageByUrl(newUrl); // évite un fichier orphelin
+    throw error;
+  }
+  return newUrl;
+};
+
 // Database helpers
 export const getPhotos = async () => {
   const { data, error } = await supabase

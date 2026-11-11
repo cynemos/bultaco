@@ -1,0 +1,51 @@
+# Sauvegarde automatique du site (base de données + photos)
+#
+# - Tourne deux fois par semaine (lundi et jeudi, 3 h du matin, heure de Paris en hiver)
+#   et à la demande (onglet Actions → Sauvegarde → Run workflow).
+# - Le résultat est une archive téléchargeable dans l'onglet Actions, conservée 90 jours.
+# - Ces accès réguliers évitent aussi la mise en pause du projet Supabase gratuit
+#   pour inactivité.
+#
+# Secrets à créer dans GitHub (Settings → Secrets and variables → Actions) :
+#   SUPABASE_URL               l'URL du projet Supabase
+#   SUPABASE_SERVICE_ROLE_KEY  la clé « service_role » (Supabase → Project Settings → API Keys)
+
+name: Sauvegarde
+
+on:
+  schedule:
+    - cron: '0 2 * * 1,4'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sauvegarde:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci --no-audit --no-fund
+
+      - name: Exporter la base et les photos
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/backup.mjs backup
+
+      - name: Date du jour
+        id: date
+        run: echo "jour=$(date +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bultaco-sauvegarde-${{ steps.date.outputs.jour }}
+          path: backup/
+          retention-days: 90

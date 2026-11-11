@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Calendar, MapPin, Cog, Clock } from 'lucide-react';
 import { useSiteSettings } from '../contexts/SettingsContext';
 
-const HeroSection: React.FC = () => {
+interface HeroSectionProps {
+  onDiscover?: () => void;
+}
+
+const HeroSection: React.FC<HeroSectionProps> = ({ onDiscover }) => {
   const { settings } = useSiteSettings();
   const year = String(settings.bike_year);
   const model = String(settings.bike_model);
@@ -91,9 +95,13 @@ const HeroSection: React.FC = () => {
         </div>
 
         <div className="mt-12">
-          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-orange-600 px-8 py-3 rounded-full text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+          <button
+            type="button"
+            onClick={onDiscover}
+            className="inline-flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-orange-600 px-8 py-3 rounded-full text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-300"
+          >
             <span>Découvrir la restauration</span>
-          </div>
+          </button>
         </div>
       </div>
 

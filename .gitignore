@@ -26,3 +26,6 @@ dist-ssr
 
 # Fichiers temporaires de Vite
 *.timestamp-*.mjs
+
+# Sauvegardes locales
+backup/

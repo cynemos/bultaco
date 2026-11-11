@@ -74,7 +74,12 @@ const AppContent: React.FC = () => {
       
       {activeSection === 'home' && (
         <>
-          <HeroSection />
+          <HeroSection
+            onDiscover={() => {
+              setActiveSection('timeline');
+              window.scrollTo({ top: 0 });
+            }}
+          />
           <div className="py-16">
             <BeforeAfter />
           </div>
