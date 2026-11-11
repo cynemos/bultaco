@@ -6,6 +6,9 @@ const HeroSection: React.FC = () => {
   const { settings } = useSiteSettings();
   const year = String(settings.bike_year);
   const model = String(settings.bike_model);
+  const registration = settings.first_registration_date
+    ? new Date(String(settings.first_registration_date)).toLocaleDateString('fr-FR')
+    : '';
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background with overlay */}
@@ -31,8 +34,11 @@ const HeroSection: React.FC = () => {
         <div className="grid md:grid-cols-3 gap-8 mb-12">
           <div className="bg-zinc-900/60 backdrop-blur-sm p-6 rounded-xl border border-orange-500/20">
             <Calendar className="h-8 w-8 text-orange-500 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Année</h3>
+            <h3 className="text-xl font-semibold mb-2">Année modèle</h3>
             <p className="text-zinc-400">{year} - Modèle authentique</p>
+            {registration && (
+              <p className="text-zinc-500 text-sm mt-1">1re mise en circulation : {registration}</p>
+            )}
           </div>
           
           <div className="bg-zinc-900/60 backdrop-blur-sm p-6 rounded-xl border border-orange-500/20">
