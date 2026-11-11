@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Calendar, MapPin, Cog, Clock } from 'lucide-react';
 import { useSiteSettings } from '../contexts/SettingsContext';
 
@@ -7,22 +7,34 @@ const HeroSection: React.FC = () => {
   const year = String(settings.bike_year);
   const model = String(settings.bike_model);
   const workHours = Math.max(0, Number(settings.work_hours) || 0);
+  const heroImage = String(settings.hero_image_url || '');
+  const overlay = Math.max(0, Math.min(95, Number(settings.hero_overlay_opacity) || 0)) / 100;
+  const [imageError, setImageError] = useState(false);
+  useEffect(() => setImageError(false), [heroImage]);
   const registration = settings.first_registration_date
     ? new Date(String(settings.first_registration_date)).toLocaleDateString('fr-FR')
     : '';
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background with overlay */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-zinc-900/90 to-black/80 z-10"></div>
-        <img
-          src={String(settings.hero_image_url)}
-          alt=""
-          className="w-full h-full object-cover"
+      {/* Image de fond + voile réglable (Admin → Paramètres → Affichage) */}
+      <div className="absolute inset-0 z-0 bg-zinc-950">
+        {heroImage && !imageError && (
+          <img
+            src={heroImage}
+            alt=""
+            onError={() => setImageError(true)}
+            className="w-full h-full object-cover"
+          />
+        )}
+        <div
+          className="absolute inset-0 z-10"
+          style={{
+            background: `linear-gradient(135deg, rgba(24,24,27,${overlay}) 0%, rgba(0,0,0,${Math.min(1, overlay * 0.85)}) 100%)`
+          }}
         />
       </div>
 
-      <div className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center [text-shadow:0_2px_12px_rgba(0,0,0,0.6)]">
         <div className="mb-8">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
             {String(settings.site_title)}

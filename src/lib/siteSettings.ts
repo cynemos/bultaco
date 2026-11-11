@@ -2,7 +2,7 @@
 // par les pages publiques. Chaque paramètre a une valeur par défaut : le site
 // fonctionne même si la ligne n'existe pas encore en base.
 
-export type SettingType = 'text' | 'textarea' | 'email' | 'tel' | 'date' | 'number' | 'boolean' | 'url';
+export type SettingType = 'text' | 'textarea' | 'email' | 'tel' | 'date' | 'number' | 'boolean' | 'url' | 'range';
 
 export interface SettingDefinition {
   key: string;
@@ -11,6 +11,10 @@ export interface SettingDefinition {
   type: SettingType;
   defaultValue: string | number | boolean;
   help?: string;
+  // Curseur (type range) : bornes et unité affichée
+  min?: number;
+  max?: number;
+  unit?: string;
 }
 
 export const SETTING_CATEGORIES = [
@@ -53,10 +57,14 @@ export const SETTING_DEFINITIONS: SettingDefinition[] = [
     help: "Décoché, le numéro n'est plus visible ni lisible publiquement." },
 
   { key: 'hero_image_url', label: "Image de fond de l'accueil", category: 'display', type: 'url',
-    defaultValue: 'https://images.pexels.com/photos/279949/pexels-photo-279949.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop' },
+    defaultValue: 'https://images.pexels.com/photos/279949/pexels-photo-279949.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop',
+    help: 'Choisissez une photo de la galerie ou collez l’adresse d’une image.' },
+  { key: 'hero_overlay_opacity', label: "Assombrissement de l'image d'accueil", category: 'display', type: 'range',
+    defaultValue: 60, min: 0, max: 95, unit: '%',
+    help: '0 % = image intacte, 95 % = presque noire. Un voile plus fort rend le texte plus lisible.' },
   { key: 'before_image_url', label: 'Photo « avant »', category: 'display', type: 'url',
     defaultValue: 'https://i.servimg.com/u/f28/12/40/02/10/trial-12.jpg',
-    help: 'Astuce : copiez l’adresse d’une photo de la galerie (clic droit sur l’image → copier l’adresse).' },
+    help: 'Choisissez une photo de la galerie ou collez l’adresse d’une image.' },
   { key: 'after_image_url', label: 'Photo « après »', category: 'display', type: 'url',
     defaultValue: 'https://i.servimg.com/u/f73/20/54/60/69/img_5111.jpg' },
   { key: 'gallery_items_per_page', label: 'Photos affichées par page dans la galerie', category: 'display', type: 'number', defaultValue: 12,
@@ -95,11 +103,12 @@ export const decodeSettingValue = (value: unknown): unknown => {
 const coerce = (definition: SettingDefinition, raw: unknown): string | number | boolean => {
   const value = decodeSettingValue(raw);
   if (value === null || value === undefined || value === '') {
-    return definition.type === 'boolean' || definition.type === 'number' ? definition.defaultValue : '';
+    return ['boolean', 'number', 'range'].includes(definition.type) ? definition.defaultValue : '';
   }
   switch (definition.type) {
     case 'boolean':
       return value === true || value === 'true';
+    case 'range':
     case 'number': {
       const n = Number(value);
       return Number.isFinite(n) ? n : definition.defaultValue;
