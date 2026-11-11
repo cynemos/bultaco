@@ -8,14 +8,26 @@ import { useSiteSettings } from '../contexts/SettingsContext';
 // - souris, doigt ou stylet (pointer events), clic n'importe où pour placer le volet ;
 // - clavier : flèches, Origine / Fin.
 const BeforeAfter: React.FC = () => {
-  const { settings } = useSiteSettings();
+  const { settings, content } = useSiteSettings();
   const [position, setPosition] = useState(50);
+  const [pairIndex, setPairIndex] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [ratio, setRatio] = useState(4 / 3);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const beforeUrl = String(settings.before_image_url);
-  const afterUrl = String(settings.after_image_url);
+  // Couples définis dans Admin → Paramètres → Avant / Après ; à défaut, les photos
+  // « avant » / « après » des paramètres d'affichage
+  const pairs = content.beforeAfter?.filter(p => p.before && p.after) ?? [
+    { title: 'La moto', before: String(settings.before_image_url), after: String(settings.after_image_url) }
+  ];
+  const pair = pairs[Math.min(pairIndex, pairs.length - 1)] || pairs[0];
+  const beforeUrl = pair?.before || '';
+  const afterUrl = pair?.after || '';
+
+  const selectPair = (index: number) => {
+    setPairIndex(index);
+    setPosition(50);
+  };
 
   const moveTo = useCallback((clientX: number) => {
     const rect = containerRef.current?.getBoundingClientRect();
@@ -76,6 +88,24 @@ const BeforeAfter: React.FC = () => {
             Faites glisser le volet pour découvrir la transformation de la moto
           </p>
         </div>
+
+        {pairs.length > 1 && (
+          <div className="flex flex-wrap justify-center gap-2 mb-5" role="tablist" aria-label="Choisir la comparaison">
+            {pairs.map((p, index) => (
+              <button
+                key={index}
+                role="tab"
+                aria-selected={index === pairIndex}
+                onClick={() => selectPair(index)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  index === pairIndex ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-orange-400'
+                }`}
+              >
+                {p.title || `Comparaison ${index + 1}`}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="bg-zinc-900 rounded-2xl p-3 sm:p-6 border border-zinc-800">
           <div

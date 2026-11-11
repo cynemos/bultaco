@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, CheckCircle, Circle, AlertCircle, Link2, Check, Package, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { formatDateFr } from '../lib/format';
+import { Calendar, Clock, CheckCircle, Circle, AlertCircle, Link2, Check, Package } from 'lucide-react';
 import { getTimelineEvents, getPhotos, getPartsCosts } from '../lib/supabase';
 import { TimelineEvent, Photo, PartCost } from '../types';
 import { stepSlug } from '../lib/slug';
 import { useRoute } from '../lib/router';
+import PhotoViewer from './PhotoViewer';
 import { useSiteSettings } from '../contexts/SettingsContext';
 
 const getYouTubeEmbedUrl = (url: string): string | null => {
@@ -168,7 +170,7 @@ const Timeline: React.FC = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
                       <Calendar className="h-5 w-5 text-orange-400" />
-                      <span className="text-orange-400 font-medium">{event.date}</span>
+                      <span className="text-orange-400 font-medium">{formatDateFr(event.date)}</span>
                     </div>
                     {event.category && (
                       <span className="px-3 py-1 text-xs font-medium bg-zinc-700 text-zinc-300 rounded-full">
@@ -280,47 +282,12 @@ const Timeline: React.FC = () => {
       </div>
 
       {viewer && (
-        <div
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setViewer(null)}
-        >
-          <figure className="relative max-w-5xl w-full" onClick={e => e.stopPropagation()}>
-            <img
-              src={viewer.photos[viewer.index].url}
-              alt={viewer.photos[viewer.index].title}
-              className="max-h-[80vh] w-full object-contain rounded-lg"
-            />
-            <figcaption className="text-center text-zinc-300 mt-3">
-              {viewer.photos[viewer.index].title}
-              <span className="text-zinc-500"> · {viewer.index + 1}/{viewer.photos.length}</span>
-            </figcaption>
-            <button
-              onClick={() => setViewer(null)}
-              className="absolute top-2 right-2 bg-black/60 p-2 rounded-lg text-white hover:bg-orange-500"
-              aria-label="Fermer"
-            >
-              <X className="h-5 w-5" />
-            </button>
-            {viewer.photos.length > 1 && (
-              <>
-                <button
-                  onClick={() => setViewer({ ...viewer, index: (viewer.index - 1 + viewer.photos.length) % viewer.photos.length })}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 p-2 rounded-full text-white hover:bg-orange-500"
-                  aria-label="Photo précédente"
-                >
-                  <ChevronLeft className="h-6 w-6" />
-                </button>
-                <button
-                  onClick={() => setViewer({ ...viewer, index: (viewer.index + 1) % viewer.photos.length })}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 p-2 rounded-full text-white hover:bg-orange-500"
-                  aria-label="Photo suivante"
-                >
-                  <ChevronRight className="h-6 w-6" />
-                </button>
-              </>
-            )}
-          </figure>
-        </div>
+        <PhotoViewer
+          photos={viewer.photos}
+          index={viewer.index}
+          onIndexChange={index => setViewer({ ...viewer, index })}
+          onClose={() => setViewer(null)}
+        />
       )}
     </section>
   );

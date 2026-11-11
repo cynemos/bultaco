@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatDateFr } from '../../lib/format';
 import { Plus, CreditCard as Edit2, Trash2, X, Calendar, Clock, CheckCircle, Circle, AlertCircle, Upload, Youtube, Link2 } from 'lucide-react';
 import { getTimelineEvents, addTimelineEvent, updateTimelineEvent, deleteTimelineEvent, uploadImage, removeImageByUrl } from '../../lib/supabase';
 import { TimelineEvent } from '../../types';
@@ -407,7 +408,7 @@ const TimelineManager: React.FC = () => {
                     <div className="flex items-center space-x-4 text-sm text-zinc-400">
                       <span className="flex items-center space-x-1">
                         <Calendar className="h-4 w-4" />
-                        <span>{event.date}</span>
+                        <span>{formatDateFr(event.date)}</span>
                       </span>
                       {event.category && (
                         <span className="bg-zinc-700 px-2 py-1 rounded text-xs">

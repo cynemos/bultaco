@@ -41,8 +41,16 @@ export interface Palmares {
 
 export const CONTENT_KEYS = {
   techSheet: 'tech_sheet',
-  palmares: 'tech_palmares'
+  palmares: 'tech_palmares',
+  beforeAfter: 'before_after_pairs'
 } as const;
+
+// Couples de photos avant / après (comparateur de l'accueil)
+export interface BeforeAfterPair {
+  title: string;
+  before: string;
+  after: string;
+}
 
 export const SECTION_ICON_LABELS: Record<SectionIcon, string> = {
   general: 'Informations générales',
@@ -152,6 +160,9 @@ export const DEFAULT_PALMARES: Palmares = {
 export interface SiteContent {
   techSheet: TechSheet;
   palmares: Palmares;
+  // null tant qu'aucun couple n'a été enregistré : l'accueil utilise alors
+  // les photos « avant » / « après » des Paramètres
+  beforeAfter: BeforeAfterPair[] | null;
 }
 
 const parse = <T,>(raw: unknown, fallback: T, isValid: (v: unknown) => boolean): T => {
@@ -174,13 +185,15 @@ export const buildSiteContent = (rows: { key: string; value: unknown }[]): SiteC
     ),
     palmares: parse(get(CONTENT_KEYS.palmares), DEFAULT_PALMARES, v =>
       !!v && Array.isArray((v as Palmares).entries)
-    )
+    ),
+    beforeAfter: parse<BeforeAfterPair[] | null>(get(CONTENT_KEYS.beforeAfter), null, v => Array.isArray(v) && v.length > 0)
   };
 };
 
 export const defaultSiteContent = (): SiteContent => ({
   techSheet: DEFAULT_TECH_SHEET,
-  palmares: DEFAULT_PALMARES
+  palmares: DEFAULT_PALMARES,
+  beforeAfter: null
 });
 
 // Remplace {modele}, {annee}, {mise_en_circulation} par les valeurs des paramètres.

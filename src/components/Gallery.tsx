@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { formatDateFr } from '../lib/format';
 import { Search, Filter, ZoomIn } from 'lucide-react';
 import { getPhotos } from '../lib/supabase';
 import { useSiteSettings } from '../contexts/SettingsContext';
 import { navigate, useRoute } from '../lib/router';
+import PhotoViewer from './PhotoViewer';
 
 const Gallery: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -66,6 +68,8 @@ const Gallery: React.FC = () => {
 
   const visibleImages = filteredImages.slice(0, visibleCount);
   const selectedPhoto = openPhotoId ? photos.find(p => p.id === openPhotoId) : undefined;
+  // La visionneuse parcourt les photos du filtre en cours (ou toutes si la photo n'y figure pas)
+  const viewerList = selectedPhoto && filteredImages.some(p => p.id === selectedPhoto.id) ? filteredImages : photos;
   return (
     <section className="pt-24 pb-16 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -133,11 +137,15 @@ const Gallery: React.FC = () => {
                   className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                {/* Toute la photo est cliquable (indispensable sur mobile, sans survol) */}
                 <button
                   onClick={() => setSelectedImage(image.id)}
-                  className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-orange-500"
+                  className="absolute inset-0 flex items-start justify-end p-4 focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-400"
+                  aria-label={`Agrandir : ${image.title}`}
                 >
-                  <ZoomIn className="h-5 w-5 text-white" />
+                  <span className="bg-black/50 backdrop-blur-sm p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <ZoomIn className="h-5 w-5 text-white" />
+                  </span>
                 </button>
               </div>
               
@@ -146,7 +154,7 @@ const Gallery: React.FC = () => {
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-500/20 text-orange-400 border border-orange-500/30">
                     {updatedCategories.find(cat => cat.id === image.category)?.label}
                   </span>
-                  <span className="text-sm text-zinc-500">{image.date}</span>
+                  <span className="text-sm text-zinc-500">{formatDateFr(image.date)}</span>
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-2">{image.title}</h3>
                 <p className="text-zinc-400 leading-relaxed">{image.description}</p>
@@ -177,29 +185,12 @@ const Gallery: React.FC = () => {
 
         {/* Image Modal */}
         {selectedPhoto && (
-          <div
-            className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setSelectedImage(null)}
-          >
-            <figure className="relative max-w-5xl max-h-full">
-              <img
-                src={selectedPhoto.url}
-                alt={selectedPhoto.title}
-                className="max-w-full max-h-[80vh] object-contain rounded-lg"
-                onClick={(e) => e.stopPropagation()}
-              />
-              <figcaption className="text-center text-zinc-300 mt-3" onClick={(e) => e.stopPropagation()}>
-                {selectedPhoto.title}
-              </figcaption>
-              <button
-                onClick={() => setSelectedImage(null)}
-                className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm p-2 rounded-lg text-white hover:bg-orange-500 transition-colors"
-                aria-label="Fermer"
-              >
-                ✕
-              </button>
-            </figure>
-          </div>
+          <PhotoViewer
+            photos={viewerList}
+            index={Math.max(0, viewerList.findIndex(p => p.id === selectedPhoto.id))}
+            onIndexChange={i => setSelectedImage(viewerList[i].id)}
+            onClose={() => setSelectedImage(null)}
+          />
         )}
       </div>
     </section>
