@@ -8,3 +8,9 @@
 
 [build.environment]
   NODE_VERSION = "20"
+
+# Une adresse par page (/galerie, /chronologie…) : toutes renvoient vers l'application
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

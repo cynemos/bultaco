@@ -2,11 +2,16 @@ import React, { useState } from 'react';
 import { Search, Filter, ZoomIn } from 'lucide-react';
 import { getPhotos } from '../lib/supabase';
 import { useSiteSettings } from '../contexts/SettingsContext';
+import { navigate, useRoute } from '../lib/router';
 
 const Gallery: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const { search } = useRoute();
+  // Photo ouverte : lue dans l'adresse (/galerie?photo=…) pour pouvoir partager le lien
+  const openPhotoId = search.get('photo');
+  const setSelectedImage = (photoId: string | null) =>
+    navigate(photoId ? `/galerie?photo=${photoId}` : '/galerie', { replace: true, keepScroll: true });
   const [photos, setPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const { settings } = useSiteSettings();
@@ -60,6 +65,7 @@ const Gallery: React.FC = () => {
   })).filter(cat => cat.id === 'all' || cat.count > 0);
 
   const visibleImages = filteredImages.slice(0, visibleCount);
+  const selectedPhoto = openPhotoId ? photos.find(p => p.id === openPhotoId) : undefined;
   return (
     <section className="pt-24 pb-16 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -128,7 +134,7 @@ const Gallery: React.FC = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <button
-                  onClick={() => setSelectedImage(image.url)}
+                  onClick={() => setSelectedImage(image.id)}
                   className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-orange-500"
                 >
                   <ZoomIn className="h-5 w-5 text-white" />
@@ -170,25 +176,29 @@ const Gallery: React.FC = () => {
         )}
 
         {/* Image Modal */}
-        {selectedImage && (
+        {selectedPhoto && (
           <div
             className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={() => setSelectedImage(null)}
           >
-            <div className="relative max-w-5xl max-h-full">
+            <figure className="relative max-w-5xl max-h-full">
               <img
-                src={selectedImage}
-                alt="Photo agrandie"
-                className="max-w-full max-h-full object-contain rounded-lg"
+                src={selectedPhoto.url}
+                alt={selectedPhoto.title}
+                className="max-w-full max-h-[80vh] object-contain rounded-lg"
                 onClick={(e) => e.stopPropagation()}
               />
+              <figcaption className="text-center text-zinc-300 mt-3" onClick={(e) => e.stopPropagation()}>
+                {selectedPhoto.title}
+              </figcaption>
               <button
                 onClick={() => setSelectedImage(null)}
                 className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm p-2 rounded-lg text-white hover:bg-orange-500 transition-colors"
+                aria-label="Fermer"
               >
                 ✕
               </button>
-            </div>
+            </figure>
           </div>
         )}
       </div>

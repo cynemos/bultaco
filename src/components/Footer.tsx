@@ -2,12 +2,9 @@ import React from 'react';
 import { Heart, Mail, Phone, Calendar } from 'lucide-react';
 import { useSiteSettings } from '../contexts/SettingsContext';
 import { formatMonthYear } from '../lib/siteSettings';
+import { SECTION_PATHS, handleLinkClick } from '../lib/router';
 
-interface FooterProps {
-  onNavigate?: (section: string) => void;
-}
-
-const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+const Footer: React.FC = () => {
   const { settings } = useSiteSettings();
   const startLabel = formatMonthYear(String(settings.project_start_date));
   const email = settings.show_contact_email ? String(settings.owner_email) : '';
@@ -15,12 +12,6 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   const owner = String(settings.owner_name);
   const startYear = new Date(String(settings.project_start_date)).getFullYear() || 2025;
   const currentYear = new Date().getFullYear();
-  const handleNavClick = (section: string) => {
-    if (onNavigate) {
-      onNavigate(section);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
   return (
     <footer className="bg-zinc-950 border-t border-zinc-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -63,21 +54,21 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">Navigation</h4>
             <div className="space-y-2">
-              <button onClick={() => handleNavClick('home')} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
+              <a href={SECTION_PATHS.home} onClick={e => handleLinkClick(e, SECTION_PATHS.home)} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
                 Accueil
-              </button>
-              <button onClick={() => handleNavClick('gallery')} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
+              </a>
+              <a href={SECTION_PATHS.gallery} onClick={e => handleLinkClick(e, SECTION_PATHS.gallery)} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
                 Galerie
-              </button>
-              <button onClick={() => handleNavClick('timeline')} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
+              </a>
+              <a href={SECTION_PATHS.timeline} onClick={e => handleLinkClick(e, SECTION_PATHS.timeline)} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
                 Chronologie
-              </button>
-              <button onClick={() => handleNavClick('technical')} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
+              </a>
+              <a href={SECTION_PATHS.technical} onClick={e => handleLinkClick(e, SECTION_PATHS.technical)} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
                 Technique
-              </button>
-              <button onClick={() => handleNavClick('costs')} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
+              </a>
+              <a href={SECTION_PATHS.costs} onClick={e => handleLinkClick(e, SECTION_PATHS.costs)} className="block text-zinc-400 hover:text-orange-400 cursor-pointer transition-colors text-left">
                 Coûts
-              </button>
+              </a>
             </div>
           </div>
         </div>

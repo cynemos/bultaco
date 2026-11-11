@@ -35,11 +35,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Le chargement est déclenché par l'application, une fois la session connue
   // (un admin connecté lit aussi les paramètres non publics).
 
-  // Titre de l'onglet et description pour les moteurs de recherche
+  // Description pour les moteurs de recherche (le titre de l'onglet est géré par page dans App)
   useEffect(() => {
-    document.title = `${settings.site_title} — Restauration`;
     document.querySelector('meta[name="description"]')?.setAttribute('content', String(settings.site_description));
-  }, [settings.site_title, settings.site_description]);
+  }, [settings.site_description]);
 
   return (
     <SettingsContext.Provider value={{ settings, loaded, reload }}>
