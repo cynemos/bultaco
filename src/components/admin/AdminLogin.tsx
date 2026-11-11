@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
-const AdminLogin: React.FC = () => {
+interface AdminLoginProps {
+  onCancel?: () => void;
+}
+
+const AdminLogin: React.FC<AdminLoginProps> = ({ onCancel }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -105,6 +109,15 @@ const AdminLogin: React.FC = () => {
             <p className="text-zinc-500 text-sm">
               Accès réservé aux administrateurs
             </p>
+            {onCancel && (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="mt-3 text-sm text-orange-400 hover:text-orange-300"
+              >
+                ← Retour au site
+              </button>
+            )}
           </div>
         </div>
       </div>

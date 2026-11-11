@@ -1,21 +1,14 @@
 import React from 'react';
 import { TrendingUp, Package, PieChart, BarChart3, DollarSign } from 'lucide-react';
+import { COST_CATEGORIES } from '../../lib/costCategories';
+import { CostStatistics } from '../../lib/supabase';
 
 interface AdvancedStatsProps {
-  statistics: any;
+  statistics: Partial<CostStatistics>;
 }
 
 const AdvancedStats: React.FC<AdvancedStatsProps> = ({ statistics }) => {
-  const categories = [
-    { value: 'engine', label: 'Moteur', color: 'text-red-400' },
-    { value: 'bodywork', label: 'Carrosserie', color: 'text-blue-400' },
-    { value: 'electrical', label: 'Électricité', color: 'text-yellow-400' },
-    { value: 'wheels', label: 'Roues & Freins', color: 'text-green-400' },
-    { value: 'transmission', label: 'Transmission', color: 'text-purple-400' },
-    { value: 'suspension', label: 'Suspension', color: 'text-orange-400' },
-    { value: 'accessories', label: 'Accessoires', color: 'text-cyan-400' },
-    { value: 'tools', label: 'Outils', color: 'text-pink-400' }
-  ];
+  const categories = COST_CATEGORIES;
 
   const formatPrice = (price: number, currency = 'EUR') => {
     return new Intl.NumberFormat('fr-FR', {
@@ -43,8 +36,7 @@ const AdvancedStats: React.FC<AdvancedStatsProps> = ({ statistics }) => {
         <div className="grid md:grid-cols-2 gap-4">
           {Object.entries(statistics.averageCostByCategory || {}).map(([category, avgCost]) => {
             const categoryInfo = categories.find(c => c.value === category);
-            const count = statistics.countByCondition ?
-              Object.values(statistics.costsByCategory || {}).length : 0;
+            const count = statistics.countByCategory?.[category] || 0;
             return (
               <div key={category} className="bg-zinc-900/50 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
@@ -52,15 +44,13 @@ const AdvancedStats: React.FC<AdvancedStatsProps> = ({ statistics }) => {
                     {categoryInfo?.label || category}
                   </span>
                   <span className="text-xs text-zinc-500">
-                    {statistics.costsByCategory && statistics.costsByCategory[category]
-                      ? `(${Object.keys(statistics.costsByCategory).filter(k => k === category).length} pièce${Object.keys(statistics.costsByCategory).filter(k => k === category).length > 1 ? 's' : ''})`
-                      : ''}
+                    {count > 0 ? `(${count} ligne${count > 1 ? 's' : ''})` : ''}
                   </span>
                 </div>
                 <div className="text-xl font-bold text-white">
                   {formatPrice(avgCost as number)}
                 </div>
-                <div className="text-xs text-zinc-400 mt-1">Moyenne par pièce</div>
+                <div className="text-xs text-zinc-400 mt-1">Moyenne par ligne</div>
               </div>
             );
           })}
@@ -190,8 +180,8 @@ const AdvancedStats: React.FC<AdvancedStatsProps> = ({ statistics }) => {
                 <span className="text-sm text-zinc-400">Dépense moyenne</span>
               </div>
               <div className="text-xl font-bold text-white">
-                {statistics.budgetEvolution?.length > 0
-                  ? formatPrice(statistics.restorationCost / statistics.budgetEvolution.length)
+                {statistics.budgetEvolution?.length
+                  ? formatPrice((statistics.restorationCost || 0) / statistics.budgetEvolution.length)
                   : formatPrice(0)}
               </div>
             </div>

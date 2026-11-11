@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Save, X, Settings, Wrench, Zap, Gauge } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Settings, Wrench, Zap, Gauge } from 'lucide-react';
 import { getTechnicalSpecs, addTechnicalSpec, updateTechnicalSpec, deleteTechnicalSpec } from '../../lib/supabase';
 import { TechnicalSpec } from '../../types';
 
@@ -124,12 +124,6 @@ const TechnicalSpecsManager: React.FC = () => {
   const getStatusColor = (status: string) => {
     const statusOption = statusOptions.find(opt => opt.value === status);
     return statusOption?.color || 'bg-zinc-700 text-zinc-400 border-zinc-600';
-  };
-
-  const getCategoryIcon = (category: string) => {
-    const cat = categories.find(c => c.value === category);
-    if (!cat) return Settings;
-    return cat.icon;
   };
 
   const groupedSpecs = categories.map(category => ({

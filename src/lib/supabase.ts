@@ -1,4 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
+import {
+  ADMIN_CATEGORY,
+  LABOUR_CATEGORY,
+  PURCHASE_CATEGORY,
+  isPartCategory
+} from './costCategories';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -24,25 +30,67 @@ export const getCurrentUser = async () => {
   return user;
 };
 
-// Database helpers
+// Images
+const PHOTO_BUCKET = 'restoration-photos';
+const MAX_IMAGE_SIZE = 2000; // px, plus grand côté
+const JPEG_QUALITY = 0.85;
+
+// Réduit une photo trop grande (photos de téléphone) avant l'envoi :
+// chargement plus rapide du site et moins d'espace de stockage utilisé.
+const compressImage = async (file: File): Promise<Blob> => {
+  if (!file.type.startsWith('image/') || file.type === 'image/gif' || file.type === 'image/svg+xml') {
+    return file;
+  }
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    const scale = Math.min(1, MAX_IMAGE_SIZE / Math.max(bitmap.width, bitmap.height));
+    if (scale === 1 && file.size < 1.5 * 1024 * 1024) {
+      bitmap.close();
+      return file;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', JPEG_QUALITY));
+    return blob && blob.size < file.size ? blob : file;
+  } catch {
+    return file; // format non pris en charge par le navigateur : envoi tel quel
+  }
+};
+
 export const uploadImage = async (file: File, path: string) => {
-  const fileExt = file.name.split('.').pop();
-  const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+  const image = await compressImage(file);
+  const fileExt = image === file ? file.name.split('.').pop() : 'jpg';
+  const fileName = `${crypto.randomUUID()}.${fileExt}`;
   const filePath = `${path}/${fileName}`;
-  
+
   const { error } = await supabase.storage
-    .from('restoration-photos')
-    .upload(filePath, file);
-  
+    .from(PHOTO_BUCKET)
+    .upload(filePath, image, { contentType: image.type || file.type, cacheControl: '31536000' });
+
   if (error) throw error;
-  
+
   const { data: { publicUrl } } = supabase.storage
-    .from('restoration-photos')
+    .from(PHOTO_BUCKET)
     .getPublicUrl(filePath);
-    
+
   return publicUrl;
 };
 
+// Supprime du stockage un fichier envoyé par le site (ignore les images externes)
+export const removeImageByUrl = async (url?: string | null) => {
+  if (!url) return;
+  const marker = `/object/public/${PHOTO_BUCKET}/`;
+  const index = url.indexOf(marker);
+  if (index === -1) return;
+  const filePath = decodeURIComponent(url.slice(index + marker.length).split('?')[0]);
+  const { error } = await supabase.storage.from(PHOTO_BUCKET).remove([filePath]);
+  if (error) console.error("Impossible de supprimer l'image du stockage :", error);
+};
+
+// Database helpers
 export const getPhotos = async () => {
   const { data, error } = await supabase
     .from('photos')
@@ -71,6 +119,8 @@ export const addPhoto = async (photo: {
 };
 
 export const updatePhoto = async (id: string, updates: {
+  url?: string;
+  date?: string;
   title?: string;
   description?: string;
   category?: string;
@@ -87,12 +137,14 @@ export const updatePhoto = async (id: string, updates: {
 };
 
 export const deletePhoto = async (id: string) => {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('photos')
     .delete()
-    .eq('id', id);
-  
+    .eq('id', id)
+    .select('url');
+
   if (error) throw error;
+  await removeImageByUrl(data?.[0]?.url);
 };
 
 export const getTimelineEvents = async () => {
@@ -129,8 +181,8 @@ export const updateTimelineEvent = async (id: string, updates: {
   description?: string;
   status?: 'completed' | 'in-progress' | 'pending';
   category?: string;
-  image_url?: string;
-  video_url?: string;
+  image_url?: string | null;
+  video_url?: string | null;
 }) => {
   const { data, error } = await supabase
     .from('timeline_events')
@@ -143,12 +195,14 @@ export const updateTimelineEvent = async (id: string, updates: {
 };
 
 export const deleteTimelineEvent = async (id: string) => {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('timeline_events')
     .delete()
-    .eq('id', id);
-  
+    .eq('id', id)
+    .select('image_url');
+
   if (error) throw error;
+  await removeImageByUrl(data?.[0]?.image_url);
 };
 
 // Technical Specs helpers
@@ -478,111 +532,127 @@ export const deleteInvoice = async (id: string) => {
 };
 
 // Cost statistics
-export const getCostStatistics = async () => {
+//
+// Postes de dépenses :
+//   - achat de la moto (purchase)
+//   - pièces (toutes les catégories de pièces)
+//   - main d'œuvre (labour)
+//   - administratif (administrative : assurance, FFVE, carte grise…)
+// Coût de restauration = pièces + main d'œuvre.
+// Coût total = achat + restauration + administratif.
+const emptyCostStatistics = () => ({
+  totalCost: 0,
+  purchaseCost: 0,
+  partsCost: 0,
+  labourCost: 0,
+  administrativeCost: 0,
+  restorationCost: 0,
+  basePurchaseCost: 0,
+  basePurchase: null as any,
+  costsByCategory: {} as Record<string, number>,
+  countByCategory: {} as Record<string, number>,
+  costsByCondition: {} as Record<string, number>,
+  countByCondition: {} as Record<string, number>,
+  averageCostByCategory: {} as Record<string, number>,
+  totalParts: 0,
+  restorationParts: 0,
+  newToUsedRatio: { new: 0, used: 0, newCount: 0, usedCount: 0 },
+  budgetEvolution: [] as any[]
+});
+
+export type CostStatistics = ReturnType<typeof emptyCostStatistics>;
+
+export const getCostStatistics = async (): Promise<CostStatistics> => {
   try {
-    const { data: costs, error } = await supabase
+    const { data, error } = await supabase
       .from('parts_costs')
       .select('part_name, category, condition, price, currency, purchase_date');
 
     if (error) throw error;
 
-    const totalCost = costs?.reduce((sum, cost) => sum + parseFloat(cost.price.toString()), 0) || 0;
+    const costs = (data || []).map(cost => ({ ...cost, price: Number(cost.price) || 0 }));
+    const sum = (list: typeof costs) => list.reduce((total, cost) => total + cost.price, 0);
+    const byDate = (a: { purchase_date: string }, b: { purchase_date: string }) =>
+      new Date(a.purchase_date).getTime() - new Date(b.purchase_date).getTime();
 
-    // L'achat de l'épave = la plus ancienne dépense de catégorie 'administrative'.
-    // Les autres dépenses administratives (carte grise, démarches…) restent
-    // comptées dans la restauration, pour que achat + restauration = total.
-    const basePurchase = [...(costs || [])]
-      .filter(cost => cost.category === 'administrative')
-      .sort((a, b) => new Date(a.purchase_date).getTime() - new Date(b.purchase_date).getTime())[0] || null;
-    const basePurchaseCost = basePurchase ? parseFloat(basePurchase.price.toString()) : 0;
+    const purchases = costs.filter(cost => cost.category === PURCHASE_CATEGORY).sort(byDate);
+    const parts = costs.filter(cost => isPartCategory(cost.category));
+    const labour = costs.filter(cost => cost.category === LABOUR_CATEGORY);
+    const administrative = costs.filter(cost => cost.category === ADMIN_CATEGORY);
+    const restoration = [...parts, ...labour];
 
-    // Filter out base purchase from restoration costs
-    const restorationParts = costs?.filter(cost => cost !== basePurchase) || [];
-    const restorationCost = restorationParts.reduce((sum, cost) => sum + parseFloat(cost.price.toString()), 0);
+    const purchaseCost = sum(purchases);
+    const partsCost = sum(parts);
+    const labourCost = sum(labour);
+    const administrativeCost = sum(administrative);
+    const restorationCost = partsCost + labourCost;
 
-    // Calculate costs by category (excluding base purchase)
-    const costsByCategory = restorationParts.reduce((acc: any, cost) => {
-      acc[cost.category] = (acc[cost.category] || 0) + parseFloat(cost.price.toString());
-      return acc;
-    }, {});
-
-    // Calculate costs by condition (excluding base purchase)
-    const costsByCondition = restorationParts.reduce((acc: any, cost) => {
-      acc[cost.condition] = (acc[cost.condition] || 0) + parseFloat(cost.price.toString());
-      return acc;
-    }, {});
-
-    // Calculate average cost by category
-    const averageCostByCategory = Object.entries(costsByCategory).reduce((acc: any, [category, total]) => {
-      const count = restorationParts.filter(p => p.category === category).length;
-      acc[category] = count > 0 ? (total as number) / count : 0;
-      return acc;
-    }, {});
-
-    // Calculate parts count by condition
-    const countByCondition = restorationParts.reduce((acc: any, cost) => {
-      acc[cost.condition] = (acc[cost.condition] || 0) + 1;
-      return acc;
-    }, {});
-
-    // Calculate ratio new/used
-    const newCount = countByCondition.new || 0;
-    const usedCount = (countByCondition.used || 0) + (countByCondition.refurbished || 0);
-    const totalCountForRatio = newCount + usedCount;
-    const newToUsedRatio = totalCountForRatio > 0 ? {
-      new: Math.round((newCount / totalCountForRatio) * 100),
-      used: Math.round((usedCount / totalCountForRatio) * 100),
-      newCount,
-      usedCount
-    } : { new: 0, used: 0, newCount: 0, usedCount: 0 };
-
-    // Calculate budget evolution over time
-    const sortedCosts = [...restorationParts].sort((a, b) =>
-      new Date(a.purchase_date).getTime() - new Date(b.purchase_date).getTime()
+    // Répartition par catégorie (tout sauf l'achat de la moto)
+    const costsByCategory: Record<string, number> = {};
+    const countByCategory: Record<string, number> = {};
+    for (const cost of costs) {
+      if (cost.category === PURCHASE_CATEGORY) continue;
+      costsByCategory[cost.category] = (costsByCategory[cost.category] || 0) + cost.price;
+      countByCategory[cost.category] = (countByCategory[cost.category] || 0) + 1;
+    }
+    const averageCostByCategory = Object.fromEntries(
+      Object.entries(costsByCategory).map(([category, total]) => [category, total / countByCategory[category]])
     );
 
-    const budgetEvolution = sortedCosts.reduce((acc: any[], cost) => {
-      const previousTotal = acc.length > 0 ? acc[acc.length - 1].cumulative : 0;
-      const cumulative = previousTotal + parseFloat(cost.price.toString());
-      acc.push({
+    // État des pièces (neuf / occasion / reconditionné) : pièces uniquement
+    const costsByCondition: Record<string, number> = {};
+    const countByCondition: Record<string, number> = {};
+    for (const part of parts) {
+      costsByCondition[part.condition] = (costsByCondition[part.condition] || 0) + part.price;
+      countByCondition[part.condition] = (countByCondition[part.condition] || 0) + 1;
+    }
+
+    const newCount = countByCondition.new || 0;
+    const usedCount = (countByCondition.used || 0) + (countByCondition.refurbished || 0);
+    const ratioTotal = newCount + usedCount;
+    const newToUsedRatio = ratioTotal > 0
+      ? {
+          new: Math.round((newCount / ratioTotal) * 100),
+          used: Math.round((usedCount / ratioTotal) * 100),
+          newCount,
+          usedCount
+        }
+      : { new: 0, used: 0, newCount: 0, usedCount: 0 };
+
+    // Évolution du budget de restauration (pièces + main d'œuvre)
+    let cumulative = 0;
+    const budgetEvolution = [...restoration].sort(byDate).map(cost => {
+      cumulative += cost.price;
+      return {
         date: cost.purchase_date,
-        amount: parseFloat(cost.price.toString()),
+        amount: cost.price,
         cumulative,
         part_name: cost.part_name,
         category: cost.category
-      });
-      return acc;
-    }, []);
+      };
+    });
 
     return {
-      totalCost,
-      basePurchaseCost,
-      basePurchase,
+      totalCost: sum(costs),
+      purchaseCost,
+      partsCost,
+      labourCost,
+      administrativeCost,
       restorationCost,
+      basePurchaseCost: purchaseCost,
+      basePurchase: purchases[0] || null,
       costsByCategory,
+      countByCategory,
       costsByCondition,
-      totalParts: costs?.length || 0,
-      restorationParts: restorationParts.length,
-      averageCostByCategory,
       countByCondition,
+      averageCostByCategory,
+      totalParts: parts.length,
+      restorationParts: restoration.length,
       newToUsedRatio,
       budgetEvolution
     };
   } catch (error) {
     console.error('Error getting cost statistics:', error);
-    return {
-      totalCost: 0,
-      basePurchaseCost: 0,
-      basePurchase: null,
-      restorationCost: 0,
-      costsByCategory: {},
-      costsByCondition: {},
-      totalParts: 0,
-      restorationParts: 0,
-      averageCostByCategory: {},
-      countByCondition: {},
-      newToUsedRatio: { new: 0, used: 0, newCount: 0, usedCount: 0 },
-      budgetEvolution: []
-    };
+    return emptyCostStatistics();
   }
 };

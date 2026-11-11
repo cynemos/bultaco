@@ -1,16 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, CreditCard as Edit2, Trash2, Save, X, Calendar, Clock, CheckCircle, Circle, AlertCircle, Upload, Image as ImageIcon, Youtube } from 'lucide-react';
-import { getTimelineEvents, addTimelineEvent, updateTimelineEvent, deleteTimelineEvent, uploadImage } from '../../lib/supabase';
+import { Plus, CreditCard as Edit2, Trash2, X, Calendar, Clock, CheckCircle, Circle, AlertCircle, Upload, Youtube } from 'lucide-react';
+import { getTimelineEvents, addTimelineEvent, updateTimelineEvent, deleteTimelineEvent, uploadImage, removeImageByUrl } from '../../lib/supabase';
+import { TimelineEvent } from '../../types';
 
-interface TimelineEvent {
-  id: string;
-  date: string;
-  title: string;
-  description: string;
-  status: 'completed' | 'in-progress' | 'pending';
-  category: string;
-  image_url?: string;
-}
 
 const TimelineManager: React.FC = () => {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
@@ -100,14 +92,22 @@ const TimelineManager: React.FC = () => {
         date: formData.date,
         status: formData.status,
         category: formData.category,
-        image_url: imageUrl || undefined,
-        video_url: formData.video_url || undefined
+        image_url: imageUrl || null,
+        video_url: formData.video_url.trim() || null
       };
 
       if (editingEvent) {
         await updateTimelineEvent(editingEvent.id, eventData);
+        // Image remplacée ou retirée : on supprime l'ancien fichier du stockage
+        if (editingEvent.image_url && editingEvent.image_url !== imageUrl) {
+          await removeImageByUrl(editingEvent.image_url);
+        }
       } else {
-        await addTimelineEvent(eventData);
+        await addTimelineEvent({
+          ...eventData,
+          image_url: eventData.image_url || undefined,
+          video_url: eventData.video_url || undefined
+        });
       }
 
       await loadEvents();
@@ -338,7 +338,7 @@ const TimelineManager: React.FC = () => {
 
                   {previewUrl && (
                     <div className="mt-4">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={previewUrl}
                         alt="Aperçu"
                         className="w-full max-w-md rounded-lg border border-zinc-600"
@@ -437,7 +437,7 @@ const TimelineManager: React.FC = () => {
               
               {event.image_url && (
                 <div className="mt-4">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={event.image_url}
                     alt={event.title}
                     className="w-full max-w-md rounded-lg border border-zinc-600"

@@ -24,14 +24,12 @@ const AppContent: React.FC = () => {
     );
   }
 
-  // Show admin interface if user is logged in
-  if (user) {
-    return <AdminDashboard />;
-  }
-
-  // Show admin login if admin mode is requested
+  // Mode admin demandé : tableau de bord si connecté, sinon page de connexion.
+  // Un admin connecté peut revenir sur le site public avec « Voir le site ».
   if (showAdmin) {
-    return <AdminLogin />;
+    return user
+      ? <AdminDashboard onViewSite={() => setShowAdmin(false)} />
+      : <AdminLogin onCancel={() => setShowAdmin(false)} />;
   }
 
   return (
