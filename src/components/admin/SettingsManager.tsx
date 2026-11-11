@@ -24,6 +24,7 @@ import {
 import { useSiteSettings } from '../../contexts/SettingsContext';
 import { Setting } from '../../types';
 import ImagePicker from './ImagePicker';
+import ExternalImagesPanel from './ExternalImagesPanel';
 
 const inputClass =
   'w-full px-4 py-2.5 bg-zinc-900 border border-zinc-700 rounded-lg text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500';
@@ -316,6 +317,15 @@ const SettingsManager: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* Images hébergées hors du stockage du site */}
+      <ExternalImagesPanel
+        onDone={async () => {
+          await loadSettings();
+          await loadStorageInfo();
+          await reloadSiteSettings();
+        }}
+      />
 
       {loading ? (
         <div className="text-center py-12 text-zinc-400">Chargement des paramètres...</div>
