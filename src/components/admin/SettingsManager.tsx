@@ -1,21 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Save, 
-  Download, 
-  Upload, 
-  Trash2, 
-  Plus, 
-  Settings as SettingsIcon,
-  User,
-  Globe,
-  Database,
-  Shield,
-  HardDrive,
-  RefreshCw,
-  AlertTriangle,
-  CheckCircle,
-  Info
-} from 'lucide-react';
+import { Save, Download, Trash2, Plus, Settings as SettingsIcon, User, Globe, Database, Shield, HardDrive, RefreshCw, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 import { 
   getSettings, 
   updateSetting, 

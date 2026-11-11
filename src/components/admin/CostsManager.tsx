@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, CreditCard as Edit2, Trash2, X, Euro, Receipt, ExternalLink, TrendingUp, Package, FileText, Calendar, Filter, Search, PieChart, Wrench } from 'lucide-react';
+import { Plus, CreditCard as Edit2, Trash2, X, ExternalLink, Package, FileText, Filter, Search, PieChart, Wrench } from 'lucide-react';
 import { 
   getPartsCosts, 
   addPartCost, 
@@ -12,6 +12,7 @@ import {
   getCostStatistics
 } from '../../lib/supabase';
 import { PartCost, Invoice } from '../../types';
+import { COST_CATEGORIES, PURCHASE_CATEGORY, isPartCategory } from '../../lib/costCategories';
 
 const CostsManager: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'parts' | 'invoices' | 'stats'>('parts');
@@ -48,17 +49,7 @@ const CostsManager: React.FC = () => {
     description: ''
   });
 
-  const categories = [
-    { value: 'engine', label: 'Moteur', color: 'text-red-400' },
-    { value: 'bodywork', label: 'Carrosserie', color: 'text-blue-400' },
-    { value: 'electrical', label: 'Électricité', color: 'text-yellow-400' },
-    { value: 'wheels', label: 'Roues & Freins', color: 'text-green-400' },
-    { value: 'transmission', label: 'Transmission', color: 'text-purple-400' },
-    { value: 'suspension', label: 'Suspension', color: 'text-orange-400' },
-    { value: 'accessories', label: 'Accessoires', color: 'text-cyan-400' },
-    { value: 'tools', label: 'Outils', color: 'text-pink-400' },
-    { value: 'administrative', label: 'Administratif', color: 'text-indigo-400' }
-  ];
+  const categories = COST_CATEGORIES;
 
   const conditions = [
     { value: 'new', label: 'Neuf', color: 'bg-green-500/20 text-green-400 border-green-500/30' },
@@ -261,8 +252,9 @@ const CostsManager: React.FC = () => {
     const matchesSearch = part.part_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          part.supplier?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || part.category === categoryFilter;
-    const isNotBasePurchase = part.category !== 'administrative';
-    return matchesSearch && matchesCategory && isNotBasePurchase;
+    // L'achat de la moto est affiché dans son propre encadré
+    const isNotPurchase = part.category !== PURCHASE_CATEGORY;
+    return matchesSearch && matchesCategory && isNotPurchase;
   });
 
   const basePurchase = statistics.basePurchase;
@@ -290,7 +282,7 @@ const CostsManager: React.FC = () => {
             className="flex items-center space-x-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors"
           >
             <Plus className="h-5 w-5" />
-            <span>Ajouter pièce</span>
+            <span>Ajouter une dépense</span>
           </button>
           <button
             onClick={() => {
@@ -347,7 +339,7 @@ const CostsManager: React.FC = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-zinc-300 mb-2">
-                      Nom de la pièce *
+                      {isPartCategory(partFormData.category) ? 'Nom de la pièce *' : 'Libellé *'}
                     </label>
                     <input
                       type="text"
@@ -378,6 +370,7 @@ const CostsManager: React.FC = () => {
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-6">
+                  {isPartCategory(partFormData.category) && (
                   <div>
                     <label className="block text-sm font-medium text-zinc-300 mb-2">
                       État *
@@ -395,6 +388,7 @@ const CostsManager: React.FC = () => {
                       ))}
                     </select>
                   </div>
+                  )}
 
                   <div>
                     <label className="block text-sm font-medium text-zinc-300 mb-2">
@@ -635,7 +629,7 @@ const CostsManager: React.FC = () => {
                 <div className="mb-8">
                   <h2 className="text-xl font-bold text-white mb-4 flex items-center">
                     <Package className="h-5 w-5 text-red-400 mr-2" />
-                    Achat de l'épave
+                    Achat de la moto
                   </h2>
                   <div className="bg-red-500/10 rounded-xl p-6 border border-red-500/30">
                     <div className="flex justify-between items-start">
@@ -860,56 +854,25 @@ const CostsManager: React.FC = () => {
           {activeTab === 'stats' && (
             <div className="space-y-8">
               {/* Summary Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="bg-red-500/20 p-3 rounded-lg">
-                      <Package className="h-6 w-6 text-red-400" />
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                {[
+                  { label: 'Achat de la moto', value: statistics.purchaseCost, tint: 'text-rose-400' },
+                  { label: `Pièces (${statistics.totalParts || 0})`, value: statistics.partsCost, tint: 'text-blue-400' },
+                  { label: "Main d'œuvre", value: statistics.labourCost, tint: 'text-teal-400' },
+                  { label: 'Administratif', value: statistics.administrativeCost, tint: 'text-indigo-400' },
+                  { label: 'Investissement total', value: statistics.totalCost, tint: 'text-orange-400' }
+                ].map(card => (
+                  <div key={card.label} className="bg-zinc-800 rounded-xl p-5 border border-zinc-700">
+                    <div className={`text-2xl font-bold mb-1 ${card.tint}`}>
+                      {formatPrice(card.value || 0, 'EUR')}
                     </div>
+                    <div className="text-sm text-zinc-400">{card.label}</div>
                   </div>
-                  <div className="text-2xl font-bold text-white mb-1">
-                    {formatPrice(statistics.basePurchaseCost || 0, 'EUR')}
-                  </div>
-                  <div className="text-sm text-zinc-400">Achat épave</div>
-                </div>
-
-                <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="bg-orange-500/20 p-3 rounded-lg">
-                      <Euro className="h-6 w-6 text-orange-400" />
-                    </div>
-                    <TrendingUp className="h-4 w-4 text-green-400" />
-                  </div>
-                  <div className="text-2xl font-bold text-white mb-1">
-                    {formatPrice(statistics.totalCost || 0, 'EUR')}
-                  </div>
-                  <div className="text-sm text-zinc-400">Investissement total</div>
-                </div>
-
-                <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="bg-blue-500/20 p-3 rounded-lg">
-                      <Euro className="h-6 w-6 text-blue-400" />
-                    </div>
-                  </div>
-                  <div className="text-2xl font-bold text-white mb-1">
-                    {formatPrice(statistics.restorationCost || 0, 'EUR')}
-                  </div>
-                  <div className="text-sm text-zinc-400">Coût restauration</div>
-                </div>
-
-                <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="bg-green-500/20 p-3 rounded-lg">
-                      <Package className="h-6 w-6 text-green-400" />
-                    </div>
-                  </div>
-                  <div className="text-2xl font-bold text-white mb-1">
-                    {statistics.totalParts || 0}
-                  </div>
-                  <div className="text-sm text-zinc-400">Éléments achetés</div>
-                </div>
+                ))}
               </div>
+              <p className="text-sm text-zinc-500">
+                Coût de restauration (pièces + main d'œuvre) : {formatPrice(statistics.restorationCost || 0, 'EUR')}
+              </p>
 
               {/* Charts */}
               <div className="grid lg:grid-cols-2 gap-8">
@@ -919,7 +882,7 @@ const CostsManager: React.FC = () => {
                   <div className="space-y-4">
                     {Object.entries(statistics.costsByCategory || {}).map(([category, cost]) => {
                       const categoryInfo = categories.find(c => c.value === category);
-                      const percentage = ((cost as number) / (statistics.totalCost || 1)) * 100;
+                      const percentage = ((cost as number) / (((statistics.totalCost || 0) - (statistics.purchaseCost || 0)) || 1)) * 100;
                       return (
                         <div key={category} className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
@@ -946,11 +909,11 @@ const CostsManager: React.FC = () => {
 
                 {/* Cost by Condition */}
                 <div className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
-                  <h3 className="text-lg font-semibold text-white mb-6">Coûts par état</h3>
+                  <h3 className="text-lg font-semibold text-white mb-6">État des pièces</h3>
                   <div className="space-y-4">
                     {Object.entries(statistics.costsByCondition || {}).map(([condition, cost]) => {
                       const conditionInfo = conditions.find(c => c.value === condition);
-                      const percentage = ((cost as number) / (statistics.totalCost || 1)) * 100;
+                      const percentage = ((cost as number) / (statistics.partsCost || 1)) * 100;
                       return (
                         <div key={condition} className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">

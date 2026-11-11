@@ -108,7 +108,7 @@ const Gallery: React.FC = () => {
               className="group relative bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/10"
             >
               <div className="aspect-w-16 aspect-h-12 relative overflow-hidden">
-                <img
+                <img loading="lazy" decoding="async"
                   src={image.url}
                   alt={image.title}
                   className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
@@ -152,7 +152,7 @@ const Gallery: React.FC = () => {
             onClick={() => setSelectedImage(null)}
           >
             <div className="relative max-w-5xl max-h-full">
-              <img
+              <img loading="lazy" decoding="async"
                 src={selectedImage}
                 alt="Photo agrandie"
                 className="max-w-full max-h-full object-contain rounded-lg"

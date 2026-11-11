@@ -1,25 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Euro, Package, TrendingUp, PieChart, Calendar, Award, Info } from 'lucide-react';
-import { getPartsCosts, getCostStatistics } from '../lib/supabase';
+import { Euro, Package, PieChart, Info, Wrench, FileText, Bike } from 'lucide-react';
+import { getPartsCosts, getCostStatistics, CostStatistics } from '../lib/supabase';
+import { COST_CATEGORIES, PURCHASE_CATEGORY } from '../lib/costCategories';
 import { PartCost } from '../types';
 
 const CostsOverview: React.FC = () => {
   const [partsCosts, setPartsCosts] = useState<PartCost[]>([]);
-  const [statistics, setStatistics] = useState<any>({});
+  const [statistics, setStatistics] = useState<Partial<CostStatistics>>({});
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const categories = [
     { value: 'all', label: 'Toutes', color: 'text-orange-400' },
-    { value: 'engine', label: 'Moteur', color: 'text-red-400' },
-    { value: 'bodywork', label: 'Carrosserie', color: 'text-blue-400' },
-    { value: 'electrical', label: 'Électricité', color: 'text-yellow-400' },
-    { value: 'wheels', label: 'Roues & Freins', color: 'text-green-400' },
-    { value: 'transmission', label: 'Transmission', color: 'text-purple-400' },
-    { value: 'suspension', label: 'Suspension', color: 'text-orange-400' },
-    { value: 'accessories', label: 'Accessoires', color: 'text-cyan-400' },
-    { value: 'tools', label: 'Outils', color: 'text-pink-400' },
-    { value: 'administrative', label: 'Administratif', color: 'text-indigo-400' }
+    ...COST_CATEGORIES
   ];
 
   const conditions = [
@@ -66,7 +59,9 @@ const CostsOverview: React.FC = () => {
   );
 
   const getCategoryStats = () => {
-    return categories.slice(1).map(category => {
+    // L'achat de la moto est affiché à part : on le retire de la répartition
+    const totalWithoutPurchase = (statistics.totalCost || 0) - (statistics.purchaseCost || 0);
+    return COST_CATEGORIES.filter(category => category.value !== PURCHASE_CATEGORY).map(category => {
       const categoryParts = partsCosts.filter(part => part.category === category.value);
       const totalCost = categoryParts.reduce((sum, part) => sum + part.price, 0);
       const count = categoryParts.length;
@@ -74,7 +69,7 @@ const CostsOverview: React.FC = () => {
         ...category,
         count,
         totalCost,
-        percentage: statistics.totalCost > 0 ? (totalCost / statistics.totalCost) * 100 : 0
+        percentage: totalWithoutPurchase > 0 ? (totalCost / totalWithoutPurchase) * 100 : 0
       };
     }).filter(cat => cat.count > 0);
   };
@@ -104,83 +99,51 @@ const CostsOverview: React.FC = () => {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-          <div className="bg-zinc-900 rounded-xl p-6 border border-zinc-800">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-red-500/20 p-3 rounded-lg">
-                <Package className="h-6 w-6 text-red-400" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {[
+            { label: 'Achat de la moto', value: statistics.purchaseCost, icon: Bike, tint: 'bg-rose-500/20 text-rose-400', hint: "Prix d'achat de l'épave" },
+            { label: 'Pièces', value: statistics.partsCost, icon: Package, tint: 'bg-blue-500/20 text-blue-400', hint: `${statistics.totalParts || 0} pièces et fournitures` },
+            { label: "Main d'œuvre", value: statistics.labourCost, icon: Wrench, tint: 'bg-teal-500/20 text-teal-400', hint: 'Usinage, prestations' },
+            { label: 'Administratif', value: statistics.administrativeCost, icon: FileText, tint: 'bg-indigo-500/20 text-indigo-400', hint: 'Assurance, FFVE, carte grise…' }
+          ].map(card => (
+            <div key={card.label} className="bg-zinc-900 rounded-xl p-6 border border-zinc-800">
+              <div className={`inline-flex p-3 rounded-lg mb-4 ${card.tint}`}>
+                <card.icon className="h-6 w-6" />
               </div>
-            </div>
-            <div className="text-2xl font-bold text-white mb-1">
-              {formatPrice(statistics.basePurchaseCost || 0, 'EUR')}
-            </div>
-            <div className="text-sm text-zinc-400">Achat épave</div>
-          </div>
-
-          <div className="bg-zinc-900 rounded-xl p-6 border border-zinc-800">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-blue-500/20 p-3 rounded-lg">
-                <Euro className="h-6 w-6 text-blue-400" />
+              <div className="text-2xl font-bold text-white mb-1">
+                {formatPrice(card.value || 0, 'EUR')}
               </div>
+              <div className="text-sm text-zinc-300">{card.label}</div>
+              <div className="text-xs text-zinc-500 mt-1">{card.hint}</div>
             </div>
-            <div className="text-2xl font-bold text-white mb-1">
-              {formatPrice(statistics.restorationCost || 0, 'EUR')}
-            </div>
-            <div className="text-sm text-zinc-400">Coût restauration</div>
-          </div>
-
-          <div className="bg-zinc-900 rounded-xl p-6 border border-zinc-800">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-orange-500/20 p-3 rounded-lg">
-                <Euro className="h-6 w-6 text-orange-400" />
-              </div>
-              <TrendingUp className="h-4 w-4 text-green-400" />
-            </div>
-            <div className="text-2xl font-bold text-white mb-1">
-              {formatPrice(statistics.totalCost || 0, 'EUR')}
-            </div>
-            <div className="text-sm text-zinc-400">Coût total final</div>
-          </div>
-
-          <div className="bg-zinc-900 rounded-xl p-6 border border-zinc-800">
-            <div className="flex items-center justify-between mb-4">
-              <div className="bg-green-500/20 p-3 rounded-lg">
-                <Award className="h-6 w-6 text-green-400" />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-white mb-1">
-              {statistics.totalParts || 0}
-            </div>
-            <div className="text-sm text-zinc-400">Pièces + épave</div>
-          </div>
+          ))}
         </div>
 
         {/* Investment Breakdown */}
         <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 rounded-xl p-8 border border-orange-500/30 mb-12">
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-orange-400 mb-4">Répartition de l'investissement</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-red-400 mb-2">
-                  {formatPrice(statistics.basePurchaseCost || 0, 'EUR')}
-                </div>
-                <div className="text-zinc-300">Achat de l'épave</div>
-                <div className="text-zinc-500 text-sm">Base du projet</div>
+          <h2 className="text-2xl font-bold text-orange-400 mb-6 text-center">Répartition de l'investissement</h2>
+          <div className="grid md:grid-cols-3 gap-6 text-center">
+            <div>
+              <div className="text-3xl font-bold text-blue-400 mb-2">
+                {formatPrice(statistics.restorationCost || 0, 'EUR')}
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-400 mb-2">
-                  {formatPrice(statistics.restorationCost || 0, 'EUR')}
-                </div>
-                <div className="text-zinc-300">Coût de restauration</div>
-                <div className="text-zinc-500 text-sm">Pièces et main d'œuvre</div>
+              <div className="text-zinc-300">Coût de restauration</div>
+              <div className="text-zinc-500 text-sm">Pièces + main d'œuvre</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-rose-400 mb-2">
+                {formatPrice((statistics.purchaseCost || 0) + (statistics.administrativeCost || 0), 'EUR')}
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-orange-400 mb-2">
-                  {formatPrice(statistics.totalCost || 0, 'EUR')}
-                </div>
-                <div className="text-zinc-300">Investissement total</div>
-                <div className="text-zinc-500 text-sm">Prix de revient final</div>
+              <div className="text-zinc-300">Achat et administratif</div>
+              <div className="text-zinc-500 text-sm">Moto + frais de mise en circulation</div>
+            </div>
+            <div>
+              <div className="flex items-center justify-center gap-2 text-3xl font-bold text-orange-400 mb-2">
+                <Euro className="h-7 w-7" />
+                {formatPrice(statistics.totalCost || 0, 'EUR')}
               </div>
+              <div className="text-zinc-300">Investissement total</div>
+              <div className="text-zinc-500 text-sm">Prix de revient final</div>
             </div>
           </div>
         </div>
@@ -188,7 +151,9 @@ const CostsOverview: React.FC = () => {
         {/* Category Filter */}
         <div className="mb-8">
           <div className="flex flex-wrap gap-2 justify-center">
-            {categories.map((category) => (
+            {categories
+              .filter(category => category.value === 'all' || partsCosts.some(p => p.category === category.value))
+              .map((category) => (
               <button
                 key={category.value}
                 onClick={() => setSelectedCategory(category.value)}
@@ -213,7 +178,7 @@ const CostsOverview: React.FC = () => {
           {/* Parts List */}
           <div className="lg:col-span-2">
             <h2 className="text-2xl font-bold text-white mb-6">
-              Pièces et Composants
+              Détail des dépenses
               {selectedCategory !== 'all' && (
                 <span className="text-orange-400 ml-2">
                   - {categories.find(c => c.value === selectedCategory)?.label}
@@ -269,7 +234,7 @@ const CostsOverview: React.FC = () => {
             {filteredParts.length === 0 && (
               <div className="text-center py-12">
                 <Package className="h-16 w-16 text-zinc-600 mx-auto mb-4" />
-                <p className="text-zinc-400">Aucune pièce dans cette catégorie pour le moment</p>
+                <p className="text-zinc-400">Aucune dépense dans cette catégorie pour le moment</p>
               </div>
             )}
           </div>
@@ -337,8 +302,8 @@ const CostsOverview: React.FC = () => {
               <div className="space-y-4">
                 {Object.entries(statistics.costsByCondition || {}).map(([condition, cost]) => {
                   const conditionInfo = conditions.find(c => c.value === condition);
-                  const count = partsCosts.filter(p => p.condition === condition).length;
-                  const percentage = ((cost as number) / (statistics.totalCost || 1)) * 100;
+                  const count = statistics.countByCondition?.[condition] || 0;
+                  const percentage = ((cost as number) / (statistics.partsCost || 1)) * 100;
                   
                   return (
                     <div key={condition} className="flex items-center justify-between">

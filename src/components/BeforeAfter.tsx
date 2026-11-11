@@ -37,7 +37,7 @@ const BeforeAfter: React.FC = () => {
     setIsDragging(false);
   };
 
-  const updateSliderPosition = (event: React.MouseEvent | Touch) => {
+  const updateSliderPosition = (event: { clientX: number }) => {
     if (!containerRef.current) return;
     
     const rect = containerRef.current.getBoundingClientRect();
@@ -72,7 +72,7 @@ const BeforeAfter: React.FC = () => {
           >
             {/* Before Image */}
             <div className="absolute inset-0">
-              <img
+              <img loading="lazy" decoding="async"
                 src="https://i.servimg.com/u/f28/12/40/02/10/trial-12.jpg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop"
                 alt="Avant restauration"
                 className="w-full h-full object-cover"
@@ -88,7 +88,7 @@ const BeforeAfter: React.FC = () => {
               className="absolute inset-0 transition-all duration-75"
               style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
             >
-              <img
+              <img loading="lazy" decoding="async"
                 src="https://i.servimg.com/u/f73/20/54/60/69/img_5111.jpg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop"
                 alt="Après restauration"
                 className="w-full h-full object-cover"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Upload, X, Edit2, Trash2, Save, Image as ImageIcon } from 'lucide-react';
-import { getPhotos, addPhoto, updatePhoto, deletePhoto, uploadImage } from '../../lib/supabase';
+import { Plus, Upload, X, Edit2, Trash2, Image as ImageIcon } from 'lucide-react';
+import { getPhotos, addPhoto, updatePhoto, deletePhoto, uploadImage, removeImageByUrl } from '../../lib/supabase';
 
 interface Photo {
   id: string;
@@ -86,6 +86,10 @@ const PhotoManager: React.FC = () => {
 
       if (editingPhoto) {
         await updatePhoto(editingPhoto.id, photoData);
+        // Photo remplacée : on supprime l'ancien fichier du stockage
+        if (formData.file && editingPhoto.url !== imageUrl) {
+          await removeImageByUrl(editingPhoto.url);
+        }
       } else {
         await addPhoto(photoData);
       }
@@ -302,7 +306,7 @@ const PhotoManager: React.FC = () => {
           {photos.map((photo) => (
             <div key={photo.id} className="bg-zinc-800 rounded-xl overflow-hidden border border-zinc-700">
               <div className="aspect-w-16 aspect-h-12 relative">
-                <img
+                <img loading="lazy" decoding="async"
                   src={photo.url}
                   alt={photo.title}
                   className="w-full h-48 object-cover"

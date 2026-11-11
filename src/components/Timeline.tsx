@@ -89,7 +89,7 @@ const Timeline: React.FC = () => {
           <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-orange-500 via-orange-400 to-orange-600"></div>
 
           <div className="space-y-8">
-            {events.map((event, index) => (
+            {events.map((event) => (
               <div key={event.id} className="relative flex items-start">
                 {/* Timeline dot */}
                 <div className="relative z-10 flex items-center justify-center w-16 h-16 rounded-full bg-zinc-900 border-2 border-orange-500">
@@ -118,7 +118,7 @@ const Timeline: React.FC = () => {
 
                   {event.image_url && (
                     <div className="mt-4">
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={event.image_url}
                         alt={event.title}
                         className="w-full max-w-md rounded-lg border border-zinc-700"
@@ -130,7 +130,7 @@ const Timeline: React.FC = () => {
                     <div className="mt-4 w-full max-w-md">
                       <div className="relative w-full rounded-lg overflow-hidden border border-zinc-700" style={{ paddingBottom: '56.25%' }}>
                         <iframe
-                          src={getYouTubeEmbedUrl(event.video_url)}
+                          src={getYouTubeEmbedUrl(event.video_url) ?? undefined}
                           title={event.title}
                           className="absolute top-0 left-0 w-full h-full"
                           frameBorder="0"
