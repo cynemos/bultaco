@@ -6,6 +6,7 @@ export interface Photo {
   category: 'engine' | 'bodywork' | 'electrical' | 'wheels' | 'restoration' | 'assembly' | 'testing';
   date: string;
   tags: string[];
+  timeline_event_id?: string | null;
   isBeforePhoto?: boolean;
   isAfterPhoto?: boolean;
 }
@@ -60,6 +61,7 @@ export interface PartCost {
   supplier?: string;
   purchase_date: string;
   invoice_id?: string;
+  timeline_event_id?: string | null;
   notes?: string;
   created_at?: string;
 }

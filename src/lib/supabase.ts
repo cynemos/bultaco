@@ -170,6 +170,7 @@ export const addPhoto = async (photo: {
   category: string;
   tags: string[];
   date?: string;
+  timeline_event_id?: string | null;
 }) => {
   const { data, error } = await supabase
     .from('photos')
@@ -187,6 +188,7 @@ export const updatePhoto = async (id: string, updates: {
   description?: string;
   category?: string;
   tags?: string[];
+  timeline_event_id?: string | null;
 }) => {
   const { data, error } = await supabase
     .from('photos')
@@ -265,6 +267,25 @@ export const deleteTimelineEvent = async (id: string) => {
 
   if (error) throw error;
   await removeImageByUrl(data?.[0]?.image_url);
+};
+
+// Rattache (ou détache) en une fois des photos ou des dépenses à une étape
+export const setStepLinks = async (
+  table: 'photos' | 'parts_costs',
+  stepId: string,
+  selectedIds: string[],
+  previouslyLinkedIds: string[]
+) => {
+  const toLink = selectedIds.filter(id => !previouslyLinkedIds.includes(id));
+  const toUnlink = previouslyLinkedIds.filter(id => !selectedIds.includes(id));
+  if (toLink.length) {
+    const { error } = await supabase.from(table).update({ timeline_event_id: stepId }).in('id', toLink);
+    if (error) throw error;
+  }
+  if (toUnlink.length) {
+    const { error } = await supabase.from(table).update({ timeline_event_id: null }).in('id', toUnlink);
+    if (error) throw error;
+  }
 };
 
 // Technical Specs helpers
@@ -477,6 +498,7 @@ export const addPartCost = async (partCost: {
   supplier?: string;
   purchase_date: string;
   invoice_id?: string;
+  timeline_event_id?: string | null;
   notes?: string;
 }) => {
   const { data, error } = await supabase
@@ -497,6 +519,7 @@ export const updatePartCost = async (id: string, updates: {
   supplier?: string;
   purchase_date?: string;
   invoice_id?: string | null;
+  timeline_event_id?: string | null;
   notes?: string;
 }) => {
   const { data, error } = await supabase
