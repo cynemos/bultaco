@@ -248,16 +248,21 @@ const CostsManager: React.FC = () => {
     return new Date(dateString).toLocaleDateString('fr-FR');
   };
 
-  const filteredParts = partsCosts.filter(part => {
-    const matchesSearch = part.part_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         part.supplier?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === 'all' || part.category === categoryFilter;
-    // L'achat de la moto est affiché dans son propre encadré
-    const isNotPurchase = part.category !== PURCHASE_CATEGORY;
-    return matchesSearch && matchesCategory && isNotPurchase;
-  });
+  // Achat de la moto : la plus ancienne ligne « purchase », prise dans la liste
+  // complète (avec son identifiant) pour pouvoir la modifier.
+  const basePurchase = partsCosts
+    .filter(part => part.category === PURCHASE_CATEGORY)
+    .sort((a, b) => new Date(a.purchase_date).getTime() - new Date(b.purchase_date).getTime())[0];
 
-  const basePurchase = statistics.basePurchase;
+  const filteredParts = partsCosts.filter(part => {
+    const search = searchTerm.toLowerCase();
+    const matchesSearch = part.part_name.toLowerCase().includes(search) ||
+                         part.supplier?.toLowerCase().includes(search);
+    const matchesCategory = categoryFilter === 'all' || part.category === categoryFilter;
+    // L'achat principal est affiché dans son propre encadré
+    const isNotBasePurchase = part.id !== basePurchase?.id;
+    return matchesSearch && matchesCategory && isNotBasePurchase;
+  });
 
   const tabs = [
     { id: 'parts', label: 'Pièces', icon: Package },
