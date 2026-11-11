@@ -6,6 +6,10 @@ import { useSiteSettings } from '../contexts/SettingsContext';
 
 const TechnicalSpecs: React.FC = () => {
   const { settings } = useSiteSettings();
+  const modelYear = String(settings.bike_year);
+  const registration = settings.first_registration_date
+    ? new Date(String(settings.first_registration_date)).toLocaleDateString('fr-FR')
+    : '';
   const [specs, setSpecs] = React.useState<TechnicalSpec[]>([]);
   const [loading, setLoading] = React.useState(true);
 
@@ -35,7 +39,8 @@ const TechnicalSpecs: React.FC = () => {
     ],
     general: [
       { label: 'Modèle', value: 'Bultaco Sherpa 350T' },
-      { label: 'Année', value: String(settings.bike_year) },
+      { label: 'Année modèle', value: modelYear },
+      ...(registration ? [{ label: 'Première mise en circulation', value: registration }] : []),
       { label: 'Type', value: 'Trial' },
       { label: 'Pays d\'origine', value: 'Espagne' },
       { label: 'Constructeur', value: 'Bultaco (Bultó)' },
@@ -187,7 +192,8 @@ const TechnicalSpecs: React.FC = () => {
                   <div className="text-white font-bold text-2xl mb-2">18301224</div>
                   <div className="text-zinc-400 text-sm leading-relaxed">
                     Le numéro de châssis permet d'identifier l'année et le modèle exact de la moto.
-                    Le préfixe "183" correspond à la Sherpa 350T de 1976.
+                    Le préfixe "183" correspond à la Sherpa 350T modèle 1976
+                    {registration ? ` (première mise en circulation le ${registration}).` : '.'}
                   </div>
                 </div>
                 <div className="bg-zinc-900/50 rounded-lg p-4">
@@ -386,7 +392,7 @@ const TechnicalSpecs: React.FC = () => {
           <h3 className="text-2xl font-bold text-center text-orange-400 mb-6">L'Héritage Bultaco</h3>
           <div className="max-w-4xl mx-auto text-center">
             <p className="text-zinc-300 leading-relaxed mb-6">
-              La Bultaco Sherpa 350T de 1976 représente l'apogée de l'ingénierie espagnole en matière de trial. 
+              La Bultaco Sherpa 350T de {modelYear} représente l'apogée de l'ingénierie espagnole en matière de trial. 
               Conçue par Francisco Xavier "Paco" Bultó, cette machine révolutionnaire a redéfini les standards 
               du trial mondial grâce à son moteur 2 temps performant et son châssis ultra-léger.
             </p>

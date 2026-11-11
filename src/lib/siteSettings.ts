@@ -31,8 +31,10 @@ export const SETTING_DEFINITIONS: SettingDefinition[] = [
 
   { key: 'bike_model', label: 'Modèle', category: 'bike', type: 'text', defaultValue: 'Sherpa 350',
     help: "Utilisé dans les textes de l'accueil, de la page Coûts et de la fiche technique." },
-  { key: 'bike_year', label: 'Année', category: 'bike', type: 'number', defaultValue: 1976,
-    help: "Affichée dans l'en-tête, l'accueil et la fiche technique." },
+  { key: 'bike_year', label: 'Année modèle', category: 'bike', type: 'number', defaultValue: 1976,
+    help: "Année du modèle (préfixe de châssis 183 = 1976). Affichée dans l'en-tête, l'accueil et la fiche technique." },
+  { key: 'first_registration_date', label: 'Première mise en circulation', category: 'bike', type: 'date', defaultValue: '1977-01-01',
+    help: 'Date inscrite sur la carte grise. Affichée sur l’accueil et la fiche technique.' },
 
   { key: 'project_start_date', label: 'Début du projet', category: 'project', type: 'date', defaultValue: '2025-08-01',
     help: 'Affiché dans le pied de page et sur la page Coûts (mois et année).' },
