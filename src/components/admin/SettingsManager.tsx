@@ -8,7 +8,8 @@ import {
   RefreshCw,
   AlertTriangle,
   CheckCircle,
-  Undo2
+  Undo2,
+  Images
 } from 'lucide-react';
 import { getSettings, saveSettings, deleteSetting, exportData, getStorageUsage } from '../../lib/supabase';
 import {
@@ -22,6 +23,7 @@ import {
 } from '../../lib/siteSettings';
 import { useSiteSettings } from '../../contexts/SettingsContext';
 import { Setting } from '../../types';
+import ImagePicker from './ImagePicker';
 
 const inputClass =
   'w-full px-4 py-2.5 bg-zinc-900 border border-zinc-700 rounded-lg text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500';
@@ -36,6 +38,7 @@ const SettingsManager: React.FC = () => {
   const [exporting, setExporting] = useState(false);
   const [storageInfo, setStorageInfo] = useState({ totalSize: 0, fileCount: 0, formattedSize: '…' });
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [pickerFor, setPickerFor] = useState<SettingDefinition | null>(null);
 
   useEffect(() => {
     loadSettings();
@@ -163,6 +166,46 @@ const SettingsManager: React.FC = () => {
       );
     }
 
+    if (definition.type === 'range') {
+      const amount = Number(value) || 0;
+      const isHeroOverlay = definition.key === 'hero_overlay_opacity';
+      return (
+        <div>
+          <label htmlFor={id} className={`flex justify-between text-sm font-medium mb-1.5 ${changed ? 'text-orange-300' : 'text-zinc-300'}`}>
+            <span>{definition.label}{changed && <span className="ml-2 text-xs">(modifié)</span>}</span>
+            <span className="text-orange-400">{amount}{definition.unit}</span>
+          </label>
+          <input
+            id={id}
+            type="range"
+            min={definition.min ?? 0}
+            max={definition.max ?? 100}
+            step={5}
+            value={amount}
+            onChange={e => setValue(definition.key, Number(e.target.value))}
+            className="w-full accent-orange-500"
+          />
+          {definition.help && <p className="text-xs text-zinc-500 mt-1">{definition.help}</p>}
+          {isHeroOverlay && values.hero_image_url && (
+            // Aperçu de l'en-tête de l'accueil avec le voile choisi
+            <div className="relative mt-3 h-40 rounded-lg overflow-hidden border border-zinc-700 bg-zinc-950">
+              <img src={String(values.hero_image_url)} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(135deg, rgba(24,24,27,${amount / 100}) 0%, rgba(0,0,0,${Math.min(1, (amount / 100) * 0.85)}) 100%)`
+                }}
+              />
+              <div className="relative h-full flex flex-col items-center justify-center text-center [text-shadow:0_2px_12px_rgba(0,0,0,0.6)]">
+                <span className="text-2xl font-bold text-orange-400">{String(values.site_title)}</span>
+                <span className="text-sm text-zinc-200">Aperçu de l'accueil</span>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
     return (
       <div>
         <label htmlFor={id} className={`block text-sm font-medium mb-1.5 ${changed ? 'text-orange-300' : 'text-zinc-300'}`}>
@@ -190,13 +233,25 @@ const SettingsManager: React.FC = () => {
           />
         )}
         {definition.help && <p className="text-xs text-zinc-500 mt-1">{definition.help}</p>}
-        {definition.type === 'url' && value && (
-          <img
-            src={String(value)}
-            alt=""
-            loading="lazy"
-            className="mt-2 h-24 rounded-lg border border-zinc-700 object-cover"
-          />
+        {definition.type === 'url' && (
+          <div className="mt-2 flex flex-wrap items-end gap-3">
+            {value && (
+              <img
+                src={String(value)}
+                alt=""
+                loading="lazy"
+                className="h-24 rounded-lg border border-zinc-700 object-cover"
+              />
+            )}
+            <button
+              type="button"
+              onClick={() => setPickerFor(definition)}
+              className="flex items-center gap-2 px-3 py-2 bg-zinc-700 hover:bg-zinc-600 text-white text-sm rounded-lg transition-colors"
+            >
+              <Images className="h-4 w-4" />
+              Choisir dans la galerie
+            </button>
+          </div>
         )}
       </div>
     );
@@ -273,7 +328,7 @@ const SettingsManager: React.FC = () => {
                 {SETTING_DEFINITIONS.filter(d => d.category === category.id).map(definition => (
                   <div
                     key={definition.key}
-                    className={definition.type === 'textarea' || definition.type === 'url' ? 'md:col-span-2' : ''}
+                    className={['textarea', 'url', 'range'].includes(definition.type) ? 'md:col-span-2' : ''}
                   >
                     {renderField(definition)}
                   </div>
@@ -306,6 +361,17 @@ const SettingsManager: React.FC = () => {
             </section>
           )}
         </div>
+      )}
+
+      {pickerFor && (
+        <ImagePicker
+          title={pickerFor.label}
+          onClose={() => setPickerFor(null)}
+          onSelect={url => {
+            setValue(pickerFor.key, url);
+            setPickerFor(null);
+          }}
+        />
       )}
 
       {/* Barre d'enregistrement, visible dès qu'un champ est modifié */}
