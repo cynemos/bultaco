@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Euro, Package, PieChart, Info, Wrench, FileText, Bike } from 'lucide-react';
 import { getPartsCosts, getCostStatistics, CostStatistics } from '../lib/supabase';
 import { COST_CATEGORIES, PURCHASE_CATEGORY } from '../lib/costCategories';
+import { useSiteSettings } from '../contexts/SettingsContext';
+import { formatMonthYear } from '../lib/siteSettings';
 import { PartCost } from '../types';
 
 const CostsOverview: React.FC = () => {
@@ -9,6 +11,7 @@ const CostsOverview: React.FC = () => {
   const [statistics, setStatistics] = useState<Partial<CostStatistics>>({});
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const { settings } = useSiteSettings();
 
   const categories = [
     { value: 'all', label: 'Toutes', color: 'text-orange-400' },
@@ -280,7 +283,7 @@ const CostsOverview: React.FC = () => {
               </div>
               <div className="space-y-3 text-sm">
                 <p className="text-zinc-300">
-                  Cette restauration vise à redonner à la Bultaco Sherpa 350 de 1976 
+                  Cette restauration vise à redonner à la Bultaco {String(settings.bike_model)} de {String(settings.bike_year)}{' '}
                   son état d'origine, en respectant les spécifications constructeur.
                 </p>
                 <p className="text-zinc-300">
@@ -290,7 +293,7 @@ const CostsOverview: React.FC = () => {
                 <div className="pt-3 border-t border-orange-500/20">
                   <div className="flex justify-between text-xs">
                     <span className="text-zinc-400">Début du projet:</span>
-                    <span className="text-orange-400">Août 2025</span>
+                    <span className="text-orange-400">{formatMonthYear(String(settings.project_start_date))}</span>
                   </div>
                 </div>
               </div>

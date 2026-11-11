@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Wrench } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SettingsProvider, useSiteSettings } from './contexts/SettingsContext';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
 import Header from './components/Header';
@@ -15,6 +17,12 @@ const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
   const [activeSection, setActiveSection] = useState('home');
   const [showAdmin, setShowAdmin] = useState(false);
+  const { settings, reload: reloadSettings } = useSiteSettings();
+
+  // Une fois connecté, l'admin lit aussi les paramètres non publics
+  useEffect(() => {
+    if (!loading) reloadSettings();
+  }, [user?.id, loading, reloadSettings]);
 
   if (loading) {
     return (
@@ -32,8 +40,32 @@ const AppContent: React.FC = () => {
       : <AdminLogin onCancel={() => setShowAdmin(false)} />;
   }
 
+  // Mode maintenance : les visiteurs voient une page d'attente, l'admin garde l'accès
+  if (settings.maintenance_mode && !user) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-white flex flex-col items-center justify-center px-4 text-center">
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-4 rounded-2xl mb-6">
+          <Wrench className="h-10 w-10 text-white" />
+        </div>
+        <h1 className="text-3xl md:text-4xl font-bold text-orange-400 mb-4">{String(settings.site_title)}</h1>
+        <p className="text-zinc-300 max-w-xl whitespace-pre-line">{String(settings.maintenance_message)}</p>
+        <button
+          onClick={() => setShowAdmin(true)}
+          className="mt-10 text-sm text-zinc-600 hover:text-zinc-400"
+        >
+          Admin
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
+      {settings.maintenance_mode && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] bg-orange-500 text-white text-sm px-4 py-2 rounded-full shadow-lg">
+          Mode maintenance actif : les visiteurs voient la page d'attente
+        </div>
+      )}
       <Header 
         activeSection={activeSection} 
         setActiveSection={setActiveSection}
@@ -62,7 +94,9 @@ const AppContent: React.FC = () => {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <SettingsProvider>
+        <AppContent />
+      </SettingsProvider>
     </AuthProvider>
   );
 }

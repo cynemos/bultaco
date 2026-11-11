@@ -2,8 +2,10 @@ import React from 'react';
 import { Wine as Engine, Gauge, Zap, Settings, Trophy, Calendar, MapPin, Award } from 'lucide-react';
 import { getTechnicalSpecs } from '../lib/supabase';
 import { TechnicalSpec } from '../types';
+import { useSiteSettings } from '../contexts/SettingsContext';
 
 const TechnicalSpecs: React.FC = () => {
+  const { settings } = useSiteSettings();
   const [specs, setSpecs] = React.useState<TechnicalSpec[]>([]);
   const [loading, setLoading] = React.useState(true);
 
@@ -33,7 +35,7 @@ const TechnicalSpecs: React.FC = () => {
     ],
     general: [
       { label: 'Modèle', value: 'Bultaco Sherpa 350T' },
-      { label: 'Année', value: '1976' },
+      { label: 'Année', value: String(settings.bike_year) },
       { label: 'Type', value: 'Trial' },
       { label: 'Pays d\'origine', value: 'Espagne' },
       { label: 'Constructeur', value: 'Bultaco (Bultó)' },
@@ -389,7 +391,7 @@ const TechnicalSpecs: React.FC = () => {
               du trial mondial grâce à son moteur 2 temps performant et son châssis ultra-léger.
             </p>
             <p className="text-zinc-300 leading-relaxed">
-              Avec ses 4 titres mondiaux consécutifs, la Sherpa 350T reste l'une des motos de trial les plus 
+              Avec ses 5 titres mondiaux consécutifs, la Sherpa 350T reste l'une des motos de trial les plus 
               titrées de l'histoire. Sa restauration à l'identique permet de préserver ce patrimoine mécanique 
               exceptionnel et de perpétuer la légende Bultaco.
             </p>

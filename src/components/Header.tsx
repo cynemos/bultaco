@@ -1,5 +1,6 @@
 import React from 'react';
 import { Menu, X, Wrench } from 'lucide-react';
+import { useSiteSettings } from '../contexts/SettingsContext';
 
 interface HeaderProps {
   activeSection: string;
@@ -9,6 +10,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, onAdminClick }) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const { settings } = useSiteSettings();
 
   const menuItems = [
     { id: 'home', label: 'Accueil' },
@@ -27,8 +29,8 @@ const Header: React.FC<HeaderProps> = ({ activeSection, setActiveSection, onAdmi
               <Wrench className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Bultaco Sherpa 350</h1>
-              <p className="text-sm text-orange-400">Restauration 1976</p>
+              <h1 className="text-xl font-bold text-white">{String(settings.site_title)}</h1>
+              <p className="text-sm text-orange-400">Restauration {String(settings.bike_year)}</p>
             </div>
           </div>
 
