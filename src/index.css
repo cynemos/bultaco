@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Impression (dossier de restauration) : fond blanc, pas de décor écran */
+@media print {
+  @page { margin: 14mm; }
+  html, body { background: #fff !important; }
+  body > #root > div { background: #fff !important; }
+}
