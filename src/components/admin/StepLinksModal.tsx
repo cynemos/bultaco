@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { formatDateFr } from '../../lib/format';
 import { X, Image as ImageIcon, Package, RefreshCw, Save, Search } from 'lucide-react';
 import { getPhotos, getPartsCosts, setStepLinks } from '../../lib/supabase';
 import { Photo, PartCost, TimelineEvent } from '../../types';
@@ -167,7 +168,7 @@ const StepLinksModal: React.FC<StepLinksModalProps> = ({ step, steps, onClose, o
                     <img src={photo.url} alt="" loading="lazy" className="w-full h-24 object-cover" />
                     <span className="block px-2 pt-1 text-xs text-zinc-200 truncate">{photo.title}</span>
                     <span className="block px-2 pb-1 text-[11px] text-zinc-500 truncate">
-                      {photo.date}{other ? ` · déjà dans « ${other} »` : ''}
+                      {formatDateFr(photo.date, { short: true })}{other ? ` · déjà dans « ${other} »` : ''}
                     </span>
                   </label>
                 );

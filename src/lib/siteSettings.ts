@@ -15,6 +15,8 @@ export interface SettingDefinition {
   min?: number;
   max?: number;
   unit?: string;
+  // Non affiché dans le formulaire Paramètres (géré par un éditeur dédié)
+  hidden?: boolean;
 }
 
 export const SETTING_CATEGORIES = [
@@ -76,10 +78,10 @@ Avec ses 5 titres mondiaux consécutifs, la Sherpa 350T reste l'une des motos de
   { key: 'hero_overlay_opacity', label: "Assombrissement de l'image d'accueil", category: 'display', type: 'range',
     defaultValue: 60, min: 0, max: 95, unit: '%',
     help: '0 % = image intacte, 95 % = presque noire. Un voile plus fort rend le texte plus lisible.' },
-  { key: 'before_image_url', label: 'Photo « avant »', category: 'display', type: 'url',
+  { key: 'before_image_url', label: 'Photo « avant »', category: 'display', type: 'url', hidden: true,
     defaultValue: 'https://i.servimg.com/u/f28/12/40/02/10/trial-12.jpg',
     help: 'Choisissez une photo de la galerie ou collez l’adresse d’une image.' },
-  { key: 'after_image_url', label: 'Photo « après »', category: 'display', type: 'url',
+  { key: 'after_image_url', label: 'Photo « après »', category: 'display', type: 'url', hidden: true,
     defaultValue: 'https://i.servimg.com/u/f73/20/54/60/69/img_5111.jpg' },
   { key: 'gallery_items_per_page', label: 'Photos affichées par page dans la galerie', category: 'display', type: 'number', defaultValue: 12,
     help: 'Un bouton « Afficher plus » charge la suite.' },

@@ -26,6 +26,7 @@ import { CONTENT_KEYS } from '../../lib/siteContent';
 import { Setting } from '../../types';
 import ImagePicker from './ImagePicker';
 import ExternalImagesPanel from './ExternalImagesPanel';
+import BeforeAfterEditor from './BeforeAfterEditor';
 
 const inputClass =
   'w-full px-4 py-2.5 bg-zinc-900 border border-zinc-700 rounded-lg text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500';
@@ -339,7 +340,7 @@ const SettingsManager: React.FC = () => {
             <section key={category.id} className="bg-zinc-800 rounded-xl p-6 border border-zinc-700">
               <h3 className="text-lg font-semibold text-white mb-5">{category.label}</h3>
               <div className="grid md:grid-cols-2 gap-5">
-                {SETTING_DEFINITIONS.filter(d => d.category === category.id).map(definition => (
+                {SETTING_DEFINITIONS.filter(d => d.category === category.id && !d.hidden).map(definition => (
                   <div
                     key={definition.key}
                     className={['textarea', 'url', 'range'].includes(definition.type) ? 'md:col-span-2' : ''}
@@ -350,6 +351,8 @@ const SettingsManager: React.FC = () => {
               </div>
             </section>
           ))}
+
+          <BeforeAfterEditor />
 
           {unknownRows.length > 0 && (
             <section className="bg-zinc-800/50 rounded-xl p-6 border border-zinc-700 border-dashed">

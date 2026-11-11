@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatDateFr } from '../../lib/format';
 import { Plus, Upload, X, Edit2, Trash2, Image as ImageIcon } from 'lucide-react';
 import { getPhotos, addPhoto, updatePhoto, deletePhoto, uploadImage, removeImageByUrl } from '../../lib/supabase';
 import StepSelect from './StepSelect';
@@ -344,7 +345,7 @@ const PhotoManager: React.FC = () => {
                   <span className="bg-orange-500/20 text-orange-400 px-2 py-1 rounded">
                     {categories.find(cat => cat.value === photo.category)?.label}
                   </span>
-                  <span className="text-zinc-500">{photo.date}</span>
+                  <span className="text-zinc-500">{formatDateFr(photo.date)}</span>
                 </div>
               </div>
             </div>

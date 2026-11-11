@@ -3,6 +3,7 @@ import { Euro, Package, PieChart, Info, Wrench, FileText, Bike, Clock } from 'lu
 import { getPartsCosts, getCostStatistics, CostStatistics } from '../lib/supabase';
 import { COST_CATEGORIES, PURCHASE_CATEGORY } from '../lib/costCategories';
 import { useSiteSettings } from '../contexts/SettingsContext';
+import BudgetChart from './BudgetChart';
 import { formatMonthYear } from '../lib/siteSettings';
 import { PartCost } from '../types';
 
@@ -163,6 +164,9 @@ const CostsOverview: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Évolution du budget */}
+        <BudgetChart points={statistics.budgetEvolution || []} />
 
         {/* Travail personnel */}
         {workHours > 0 && (
