@@ -1,11 +1,12 @@
 import React from 'react';
-import { Calendar, MapPin, Cog } from 'lucide-react';
+import { Calendar, MapPin, Cog, Clock } from 'lucide-react';
 import { useSiteSettings } from '../contexts/SettingsContext';
 
 const HeroSection: React.FC = () => {
   const { settings } = useSiteSettings();
   const year = String(settings.bike_year);
   const model = String(settings.bike_model);
+  const workHours = Math.max(0, Number(settings.work_hours) || 0);
   const registration = settings.first_registration_date
     ? new Date(String(settings.first_registration_date)).toLocaleDateString('fr-FR')
     : '';
@@ -31,7 +32,7 @@ const HeroSection: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
+        <div className={`grid sm:grid-cols-2 gap-8 mb-12 ${workHours > 0 ? 'lg:grid-cols-4' : 'md:grid-cols-3'}`}>
           <div className="bg-zinc-900/60 backdrop-blur-sm p-6 rounded-xl border border-orange-500/20">
             <Calendar className="h-8 w-8 text-orange-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">Année modèle</h3>
@@ -52,6 +53,15 @@ const HeroSection: React.FC = () => {
             <h3 className="text-xl font-semibold mb-2">État initial</h3>
             <p className="text-zinc-400">Épave - Moteur bloqué</p>
           </div>
+
+          {workHours > 0 && (
+            <div className="bg-zinc-900/60 backdrop-blur-sm p-6 rounded-xl border border-orange-500/20">
+              <Clock className="h-8 w-8 text-orange-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Travail</h3>
+              <p className="text-zinc-400">≈ {new Intl.NumberFormat('fr-FR').format(workHours)} heures</p>
+              <p className="text-zinc-500 text-sm mt-1">100 % fait maison</p>
+            </div>
+          )}
         </div>
 
         <div className="max-w-4xl mx-auto">

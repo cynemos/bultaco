@@ -182,7 +182,7 @@ const SettingsManager: React.FC = () => {
             id={id}
             type={definition.type}
             value={String(value ?? '')}
-            min={definition.type === 'number' ? 1 : undefined}
+            min={definition.type === 'number' ? 0 : undefined}
             onChange={e =>
               setValue(definition.key, definition.type === 'number' ? Number(e.target.value) : e.target.value)
             }
