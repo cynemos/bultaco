@@ -35,8 +35,26 @@ const Timeline: React.FC = () => {
   useEffect(() => {
     if (!hash || loading) return;
     const target = document.getElementById(hash);
-    // Saut direct (le défilement « doux » est ignoré par certains navigateurs à l'arrivée sur la page)
-    if (target) setTimeout(() => target.scrollIntoView({ block: 'start' }), 100);
+    if (!target) return;
+    // Saut direct (le défilement « doux » est ignoré par certains navigateurs à l'arrivée sur la page).
+    // Les photos des étapes précédentes finissent de charger après le saut et décalent la page :
+    // on se recale quelques fois, et on arrête dès que le visiteur fait défiler lui-même.
+    let stopped = false;
+    const stop = () => { stopped = true; };
+    window.addEventListener('wheel', stop, { passive: true, once: true });
+    window.addEventListener('touchstart', stop, { passive: true, once: true });
+    window.addEventListener('keydown', stop, { once: true });
+    const timers = [100, 600, 1200, 2000, 3000].map(delay =>
+      setTimeout(() => {
+        if (!stopped) target.scrollIntoView({ block: 'start' });
+      }, delay)
+    );
+    return () => {
+      timers.forEach(clearTimeout);
+      window.removeEventListener('wheel', stop);
+      window.removeEventListener('touchstart', stop);
+      window.removeEventListener('keydown', stop);
+    };
   }, [hash, loading]);
 
   const copyStepLink = async (slug: string) => {
